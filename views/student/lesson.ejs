@@ -83,21 +83,13 @@
                       <span><%= opt %></span>
                     </label>
                   </li>
-                <% }) %>
-              </ul>
-            </div>
-          <% }) %>
+              <% }) %>
+            </ul>
+          </div>
+        <% }) %>
 
           <button type="submit" class="btn btn-primary btn-lg">Submit Quiz</button>
         </form>
-
-        <script>
-          // Make token available so apiFetch can attach it
-          (() => {
-            const cookie = document.cookie.split(';').find(c => c.trim().startsWith('gs_token='));
-            if (cookie) sessionStorage.setItem('gs_token', cookie.split('=')[1]);
-          })();
-        </script>
       <% } %>
     </section>
 
