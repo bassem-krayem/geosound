@@ -33,6 +33,9 @@ app.use('/uploads/audio', express.static(path.join(__dirname, 'uploads/audio')))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+// Attach req.user from JWT cookie on every request so the navbar and error
+// pages always have access to the current user, if any.
+app.use(loadUser);
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
 const authLimiter = rateLimit({
@@ -82,7 +85,7 @@ app.use('/', studentViewRoutes);
 app.use('/teacher', teacherViewRoutes);
 
 // Landing page
-app.get('/', loadUser, (req, res) => {
+app.get('/', (req, res) => {
   if (req.user) {
     return res.redirect(req.user.role === 'teacher' ? '/teacher/dashboard' : '/dashboard');
   }
@@ -94,7 +97,7 @@ app.use((req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ status: 'fail', message: 'Route not found.' });
   }
-  res.status(404).render('error', { title: 'Not Found', statusCode: 404, message: 'Page not found.', user: null });
+  res.status(404).render('error', { title: 'Not Found', statusCode: 404, message: 'Page not found.', user: req.user || null });
 });
 
 // ── Global error handler ──────────────────────────────────────────────────────
@@ -104,14 +107,14 @@ app.use((err, req, res, _next) => {
     if (req.path.startsWith('/api/')) {
       return res.status(403).json({ status: 'fail', message: 'Invalid CSRF token.' });
     }
-    return res.status(403).render('error', { title: 'Forbidden', statusCode: 403, message: 'Invalid or missing CSRF token. Please go back and try again.', user: null });
+    return res.status(403).render('error', { title: 'Forbidden', statusCode: 403, message: 'Invalid or missing CSRF token. Please go back and try again.', user: req.user || null });
   }
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   if (req.path.startsWith('/api/')) {
     return res.status(statusCode).json({ status: 'error', message });
   }
-  res.status(statusCode).render('error', { title: 'Error', statusCode, message, user: null });
+  res.status(statusCode).render('error', { title: 'Error', statusCode, message, user: req.user || null });
 });
 
 module.exports = app;
