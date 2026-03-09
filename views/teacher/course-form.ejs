@@ -1,0 +1,66 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main id="main-content">
+  <div class="container">
+    <div class="form-page">
+
+      <%- include('../partials/flash') %>
+
+      <!-- Breadcrumb -->
+      <ol class="breadcrumb" aria-label="Breadcrumb">
+        <li><a href="/teacher/dashboard">Dashboard</a></li>
+        <li><%= isEdit ? 'Edit Course' : 'New Course' %></li>
+      </ol>
+
+      <h1 class="mb-3"><%= isEdit ? 'Edit Course' : 'Create New Course' %></h1>
+
+      <div class="card">
+        <div class="card-body">
+          <form
+            action="<%= isEdit ? '/teacher/courses/' + course._id + '/edit' : '/teacher/courses/new' %>"
+            method="POST"
+            novalidate
+            aria-label="<%= isEdit ? 'Edit course form' : 'Create course form' %>"
+          >
+            <%- include('../partials/csrf') %>
+            <div class="form-group">
+              <label class="form-label" for="title">Course Title <span aria-hidden="true" class="text-danger">*</span></label>
+              <input
+                class="form-control"
+                type="text"
+                id="title"
+                name="title"
+                required
+                aria-required="true"
+                value="<%= typeof course !== 'undefined' && course.title ? course.title : '' %>"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="description">Description</label>
+              <textarea
+                class="form-control"
+                id="description"
+                name="description"
+                maxlength="500"
+                aria-describedby="desc-hint"
+              ><%= typeof course !== 'undefined' && course.description ? course.description : '' %></textarea>
+              <span class="form-hint" id="desc-hint">
+                <span class="char-count"></span>
+              </span>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="submit" class="btn btn-primary"><%= isEdit ? 'Save Changes' : 'Create Course' %></button>
+              <a href="/teacher/dashboard" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

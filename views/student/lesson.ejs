@@ -1,0 +1,107 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main id="main-content">
+  <div class="container">
+
+    <%- include('../partials/flash') %>
+
+    <!-- Breadcrumb -->
+    <ol class="breadcrumb" aria-label="Breadcrumb">
+      <li><a href="/courses">Courses</a></li>
+      <li><a href="/courses/<%= courseId %>"><%= courseTitle %></a></li>
+      <li><%= lesson.title %></li>
+    </ol>
+
+    <div class="page-header">
+      <div>
+        <h1><%= lesson.title %></h1>
+        <% if (lesson.description) { %><p class="text-muted"><%= lesson.description %></p><% } %>
+      </div>
+    </div>
+
+    <!-- Audio Section -->
+    <section class="audio-section" aria-labelledby="audio-heading">
+      <h2 id="audio-heading">🎧 Lesson Audio</h2>
+      <!-- Accessible live region for audio status -->
+      <div id="audio-status" aria-live="polite" aria-atomic="true" class="hidden" role="status"></div>
+
+      <% if (lesson.audioUrl) { %>
+        <div class="audio-player">
+          <audio
+            controls
+            preload="metadata"
+            aria-label="Lesson audio for: <%= lesson.title %>"
+          >
+            <source src="<%= lesson.audioUrl %>" />
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+        <p class="form-hint">Use your keyboard's Space bar to play/pause. Arrow keys to seek.</p>
+      <% } else { %>
+        <div class="alert alert-warning">No audio has been uploaded for this lesson yet.</div>
+      <% } %>
+    </section>
+
+    <!-- Quiz Section -->
+    <section class="quiz-section" aria-labelledby="quiz-heading">
+      <h2 id="quiz-heading">📝 Lesson Quiz</h2>
+      <p class="text-muted mb-3">Answer all 5 questions. You need <strong>70%</strong> or more to unlock the next lesson.</p>
+
+      <% if (!quiz) { %>
+        <div class="alert alert-info">No quiz has been set for this lesson yet.</div>
+      <% } else if (alreadyPassed) { %>
+        <div class="alert alert-success" role="status">
+          ✅ You have already passed this lesson! Your best score: <strong><%= bestScore %>%</strong>.
+          You may retake the quiz below.
+        </div>
+      <% } %>
+
+      <% if (quiz) { %>
+        <!-- Hidden result container – filled by JS after submission -->
+        <div id="quiz-result-container" hidden aria-live="polite"></div>
+
+        <form
+          id="quiz-form"
+          data-submit-url="/api/courses/<%= courseId %>/modules/<%= moduleId %>/lessons/<%= lesson._id %>/quiz/submit"
+          novalidate
+          aria-label="Quiz form"
+        >
+          <% quiz.questions.forEach((q, i) => { %>
+            <div class="question-block" data-question="<%= i %>">
+              <h3><span aria-hidden="true"><%= i + 1 %>.</span> <%= q.text %></h3>
+              <ul class="option-list" role="radiogroup" aria-label="Options for question <%= i + 1 %>">
+                <% q.options.forEach((opt, j) => { %>
+                  <li class="option-item">
+                    <label>
+                      <input
+                        type="radio"
+                        name="q<%= i %>"
+                        value="<%= j %>"
+                        aria-label="<%= opt %>"
+                      />
+                      <span><%= opt %></span>
+                    </label>
+                  </li>
+                <% }) %>
+              </ul>
+            </div>
+          <% }) %>
+
+          <button type="submit" class="btn btn-primary btn-lg">Submit Quiz</button>
+        </form>
+
+        <script>
+          // Make token available so apiFetch can attach it
+          (() => {
+            const cookie = document.cookie.split(';').find(c => c.trim().startsWith('gs_token='));
+            if (cookie) sessionStorage.setItem('gs_token', cookie.split('=')[1]);
+          })();
+        </script>
+      <% } %>
+    </section>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

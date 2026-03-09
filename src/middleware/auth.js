@@ -11,7 +11,13 @@ exports.protect = async (req, res, next) => {
     return res.status(401).json({ status: 'fail', message: 'Not authenticated. Please log in.' });
   }
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return res.status(401).json({ status: 'fail', message: 'Invalid or expired token.' });
+  }
+
   const user = await User.findById(decoded.id);
   if (!user) {
     return res.status(401).json({ status: 'fail', message: 'User no longer exists.' });

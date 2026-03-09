@@ -1,0 +1,95 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main id="main-content">
+  <div class="container">
+    <div class="form-page">
+
+      <%- include('../partials/flash') %>
+
+      <!-- Breadcrumb -->
+      <ol class="breadcrumb" aria-label="Breadcrumb">
+        <li><a href="/teacher/dashboard">Dashboard</a></li>
+        <li><a href="/teacher/courses/<%= courseId %>"><%= courseTitle %></a></li>
+        <li>Quiz: <%= lessonTitle %></li>
+      </ol>
+
+      <h1 class="mb-1"><%= quiz ? 'Edit Quiz' : 'Create Quiz' %></h1>
+      <p class="text-muted mb-3">Lesson: <strong><%= lessonTitle %></strong> &mdash; Exactly 5 questions, 4 options each.</p>
+
+      <div class="card" id="quiz-builder">
+        <div class="card-body">
+          <form
+            id="quiz-builder-form"
+            action="/teacher/courses/<%= courseId %>/modules/<%= moduleId %>/lessons/<%= lessonId %>/quiz/<%= quiz ? 'edit' : 'new' %>"
+            method="POST"
+            novalidate
+            aria-label="Quiz builder form"
+          >
+            <%- include('../partials/csrf') %>
+            <% for (let i = 0; i < 5; i++) {
+              const q = quiz && quiz.questions[i] ? quiz.questions[i] : null;
+            %>
+              <div class="question-builder" data-qblock="<%= i %>">
+                <h4>Question <%= i + 1 %></h4>
+
+                <div class="form-group">
+                  <label class="form-label" for="q<%= i %>-text">Question text <span aria-hidden="true" class="text-danger">*</span></label>
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="q<%= i %>-text"
+                    name="questions[<%= i %>][text]"
+                    required
+                    aria-required="true"
+                    value="<%= q ? q.text : '' %>"
+                  />
+                </div>
+
+                <div class="options-grid">
+                  <% for (let j = 0; j < 4; j++) { %>
+                    <div class="form-group">
+                      <label class="form-label" for="q<%= i %>-opt<%= j %>">Option <%= ['A','B','C','D'][j] %></label>
+                      <input
+                        class="form-control"
+                        type="text"
+                        id="q<%= i %>-opt<%= j %>"
+                        name="questions[<%= i %>][options][<%= j %>]"
+                        required
+                        aria-required="true"
+                        value="<%= q && q.options[j] ? q.options[j] : '' %>"
+                      />
+                    </div>
+                  <% } %>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="q<%= i %>-correct">Correct answer</label>
+                  <select
+                    class="form-control"
+                    id="q<%= i %>-correct"
+                    name="questions[<%= i %>][correctOption]"
+                    required
+                    style="max-width:220px"
+                  >
+                    <% for (let j = 0; j < 4; j++) { %>
+                      <option value="<%= j %>" <%= q && q.correctOption === j ? 'selected' : '' %>>Option <%= ['A','B','C','D'][j] %></option>
+                    <% } %>
+                  </select>
+                </div>
+              </div>
+            <% } %>
+
+            <div class="d-flex gap-2 flex-wrap mt-3">
+              <button type="submit" class="btn btn-primary"><%= quiz ? 'Save Quiz' : 'Create Quiz' %></button>
+              <a href="/teacher/courses/<%= courseId %>" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

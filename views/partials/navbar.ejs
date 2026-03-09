@@ -1,0 +1,30 @@
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container">
+    <a class="navbar-brand" href="/" aria-label="GeoSound home">
+      🌍 GeoSound
+    </a>
+    <ul class="navbar-nav" role="list">
+      <% if (typeof user !== 'undefined' && user) { %>
+        <% if (user.role === 'student') { %>
+          <li><a href="/courses" class="<%= typeof activePage !== 'undefined' && activePage === 'courses' ? 'active' : '' %>">Courses</a></li>
+          <li><a href="/dashboard" class="<%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">My Learning</a></li>
+        <% } %>
+        <% if (user.role === 'teacher') { %>
+          <li><a href="/teacher/dashboard" class="<%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">Dashboard</a></li>
+          <li><a href="/teacher/courses" class="<%= typeof activePage !== 'undefined' && activePage === 'my-courses' ? 'active' : '' %>">My Courses</a></li>
+        <% } %>
+        <li>
+          <form action="/logout" method="POST" style="margin:0">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button type="submit" class="btn btn-sm btn-nav" aria-label="Log out of GeoSound">Log Out</button>
+          </form>
+        </li>
+        <li><span class="tag <%= user.role === 'teacher' ? 'tag-teacher' : 'tag-student' %>"><%= user.name %></span></li>
+      <% } else { %>
+        <li><a href="/courses">Courses</a></li>
+        <li><a href="/login">Log In</a></li>
+        <li><a href="/register" class="btn btn-sm btn-nav">Register</a></li>
+      <% } %>
+    </ul>
+  </div>
+</nav>

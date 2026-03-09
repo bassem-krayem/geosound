@@ -1,0 +1,86 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main id="main-content">
+  <div class="container">
+
+    <%- include('../partials/flash') %>
+
+    <!-- Breadcrumb -->
+    <ol class="breadcrumb" aria-label="Breadcrumb">
+      <li><a href="/teacher/dashboard">Dashboard</a></li>
+      <li><%= course.title %></li>
+    </ol>
+
+    <div class="page-header">
+      <div>
+        <h1><%= course.title %></h1>
+        <% if (course.description) { %><p class="text-muted"><%= course.description %></p><% } %>
+      </div>
+      <div class="d-flex gap-1 flex-wrap">
+        <a href="/teacher/courses/<%= course._id %>/edit" class="btn btn-secondary btn-sm">Edit Course</a>
+        <a href="/teacher/courses/<%= course._id %>/modules/new" class="btn btn-primary">+ Add Module</a>
+      </div>
+    </div>
+
+    <!-- Modules -->
+    <% if (!modules || modules.length === 0) { %>
+      <div class="alert alert-info">No modules yet. <a href="/teacher/courses/<%= course._id %>/modules/new">Add your first module</a>.</div>
+    <% } else { %>
+      <% modules.forEach((mod, mIdx) => { %>
+        <div class="module-block">
+          <button
+            class="module-header"
+            aria-expanded="true"
+            aria-controls="mod-body-<%= mod._id %>"
+          >
+            <div>
+              <h3>Module <%= mIdx + 1 %>: <%= mod.title %></h3>
+              <% if (mod.description) { %><p style="font-size:.85rem;color:var(--text-muted);margin:0"><%= mod.description %></p><% } %>
+            </div>
+            <div class="d-flex gap-1 align-center flex-wrap" style="flex-shrink:0">
+              <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/new" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">+ Lesson</a>
+              <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/edit" class="btn btn-secondary btn-sm" onclick="event.stopPropagation()">Edit</a>
+              <form action="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/delete" method="POST" style="margin:0" onclick="event.stopPropagation()">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button type="submit" class="btn btn-danger btn-sm" data-confirm="Delete module '<%= mod.title %>' and all its lessons?">Delete</button>
+              </form>
+              <span class="chevron" aria-hidden="true" style="margin-left:.25rem">▼</span>
+            </div>
+          </button>
+
+          <div id="mod-body-<%= mod._id %>">
+            <% if (!mod.lessons || mod.lessons.length === 0) { %>
+              <p style="padding:.85rem 1.25rem;color:var(--text-muted);font-size:.9rem">No lessons yet. <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/new">Add a lesson</a>.</p>
+            <% } else { %>
+              <ul class="lesson-list" aria-label="Lessons in <%= mod.title %>">
+                <% mod.lessons.forEach((lesson, lIdx) => { %>
+                  <li class="lesson-item">
+                    <span class="lesson-icon" aria-hidden="true"><%= lesson.audioUrl ? '🎧' : '📄' %></span>
+                    <div class="lesson-info">
+                      <h4><%= lesson.title %></h4>
+                      <p>
+                        <%= lesson.audioUrl ? '✓ Audio uploaded' : '⚠ No audio' %>
+                      </p>
+                    </div>
+                    <div class="d-flex gap-1 flex-wrap">
+                      <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>/quiz" class="btn btn-accent btn-sm">Quiz</a>
+                      <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>/edit" class="btn btn-secondary btn-sm">Edit</a>
+                      <form action="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>/delete" method="POST" style="margin:0">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button type="submit" class="btn btn-danger btn-sm" data-confirm="Delete lesson '<%= lesson.title %>'?">Delete</button>
+                      </form>
+                    </div>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
