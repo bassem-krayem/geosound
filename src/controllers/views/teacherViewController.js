@@ -294,7 +294,9 @@ exports.handleQuizForm = async (req, res) => {
       title: 'Quiz', user: req.user,
       courseId: course._id, courseTitle: course.title,
       moduleId: req.params.moduleId, lessonId: lesson._id, lessonTitle: lesson.title,
-      quiz: req.body,
+      // Pass null (not req.body) so the template's quiz.questions guard is safe;
+      // if the user submitted a partial array, preserve it for re-population.
+      quiz: (Array.isArray(rawQuestions) && rawQuestions.length > 0) ? { questions: rawQuestions } : null,
       flash: { error: 'All 5 questions must be filled in.' },
     });
   }

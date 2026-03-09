@@ -28,7 +28,7 @@
           >
             <%- include('../partials/csrf') %>
             <% for (let i = 0; i < 5; i++) {
-              const q = quiz && quiz.questions[i] ? quiz.questions[i] : null;
+              const q = (quiz && quiz.questions && quiz.questions[i]) ? quiz.questions[i] : null;
             %>
               <div class="question-builder" data-qblock="<%= i %>">
                 <h4>Question <%= i + 1 %></h4>
