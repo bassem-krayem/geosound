@@ -5,6 +5,17 @@ const Quiz = require('../../models/Quiz');
 const path = require('path');
 const fs = require('fs');
 
+// Normalise a value that may be a plain object with numeric string keys (produced by the
+// `qs` parser when using `extended:true`) or already a real array.
+const toArray = (val) => {
+  if (!val) return null;
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'object') {
+    return Object.keys(val).sort((a, b) => Number(a) - Number(b)).map((k) => val[k]);
+  }
+  return null;
+};
+
 // ── Teacher dashboard ─────────────────────────────────────────────────────────
 
 exports.showDashboard = async (req, res) => {
@@ -288,22 +299,22 @@ exports.handleQuizForm = async (req, res) => {
   if (!lesson) return res.redirect(`/teacher/courses/${course._id}`);
 
   // Parse questions from form body (questions[0][text], questions[0][options][0], etc.)
-  const rawQuestions = req.body.questions;
-  if (!rawQuestions || !Array.isArray(rawQuestions) || rawQuestions.length !== 5) {
+  // With extended:true (qs), nested bracket notation is parsed as a plain object { '0': {...}, ... }
+  // not a real JS array, so we normalise it with toArray().
+  const rawQuestions = toArray(req.body.questions);
+  if (!rawQuestions || rawQuestions.length !== 5) {
     return res.render('teacher/quiz-form', {
       title: 'Quiz', user: req.user,
       courseId: course._id, courseTitle: course.title,
       moduleId: req.params.moduleId, lessonId: lesson._id, lessonTitle: lesson.title,
-      // Pass null (not req.body) so the template's quiz.questions guard is safe;
-      // if the user submitted a partial array, preserve it for re-population.
-      quiz: (Array.isArray(rawQuestions) && rawQuestions.length > 0) ? { questions: rawQuestions } : null,
+      quiz: rawQuestions ? { questions: rawQuestions } : null,
       flash: { error: 'All 5 questions must be filled in.' },
     });
   }
 
   const questions = rawQuestions.map((q) => ({
     text: (q.text || '').trim(),
-    options: Array.isArray(q.options) ? q.options.map((o) => (o || '').trim()) : [],
+    options: (toArray(q.options) || []).map((o) => (o || '').trim()),
     correctOption: parseInt(q.correctOption, 10),
   }));
 

@@ -31,7 +31,7 @@ app.use('/uploads/audio', express.static(path.join(__dirname, 'uploads/audio')))
 
 // ── Parsers ───────────────────────────────────────────────────────────────────
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // Attach req.user from JWT cookie on every request so the navbar and error
 // pages always have access to the current user, if any.

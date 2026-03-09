@@ -12,6 +12,7 @@ router.use(loadUser, requireAuth, requireRole('teacher'));
 router.get('/dashboard', teacherViewController.showDashboard);
 
 // Courses
+router.get('/courses',                                           (req, res) => res.redirect('/teacher/dashboard'));
 router.get('/courses/new',                                       teacherViewController.showNewCourse);
 router.post('/courses/new',                                      teacherViewController.handleNewCourse);
 router.get('/courses/:courseId',                                 teacherViewController.showCourse);
