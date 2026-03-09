@@ -12,7 +12,10 @@ const { generateCsrfToken, doubleCsrfProtection: _csrfMiddleware } = doubleCsrf(
   },
   size: 64,
   ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
-  // Read CSRF token from POST body field _csrf (HTML forms) or x-csrf-token header (fetch)
+  // Read CSRF token from POST body field _csrf (urlencoded forms)
+  // or x-csrf-token header (fetch/XHR).
+  // For multipart/form-data forms the body is parsed by multer, which runs
+  // before this function is called when applied at the route level.
   getCsrfTokenFromRequest: (req) =>
     (req.body && req.body._csrf) || req.headers['x-csrf-token'],
 });
@@ -20,10 +23,15 @@ const { generateCsrfToken, doubleCsrfProtection: _csrfMiddleware } = doubleCsrf(
 /**
  * CSRF protection middleware.
  * API routes using Bearer tokens are excluded – they are not susceptible to CSRF.
+ * Multipart/form-data requests are also skipped here and validated at the route
+ * level (after multer parses the body) so req.body._csrf is available.
  */
 const doubleCsrfProtection = (req, res, next) => {
   // Skip CSRF for API routes — they use Authorization headers (Bearer), not cookies
   if (req.path.startsWith('/api/')) return next();
+  // Skip here for multipart forms — validated per-route after multer runs
+  const ct = req.headers['content-type'] || '';
+  if (ct.startsWith('multipart/form-data')) return next();
   return _csrfMiddleware(req, res, next);
 };
 
@@ -36,4 +44,4 @@ const attachCsrfToken = (req, res, next) => {
   next();
 };
 
-module.exports = { doubleCsrfProtection, attachCsrfToken };
+module.exports = { doubleCsrfProtection, csrfAfterMultipart: _csrfMiddleware, attachCsrfToken };

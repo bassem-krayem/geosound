@@ -2,6 +2,7 @@ const express = require('express');
 const upload = require('../../middleware/upload');
 const teacherViewController = require('../../controllers/views/teacherViewController');
 const { loadUser, requireAuth, requireRole } = require('../../middleware/viewAuth');
+const { csrfAfterMultipart } = require('../../middleware/csrf');
 
 const router = express.Router();
 
@@ -25,11 +26,11 @@ router.get('/courses/:courseId/modules/:moduleId/edit',          teacherViewCont
 router.post('/courses/:courseId/modules/:moduleId/edit',         teacherViewController.handleEditModule);
 router.post('/courses/:courseId/modules/:moduleId/delete',       teacherViewController.handleDeleteModule);
 
-// Lessons
+// Lessons — multer runs first (parses the multipart body), then CSRF validates req.body._csrf
 router.get('/courses/:courseId/modules/:moduleId/lessons/new',             teacherViewController.showNewLesson);
-router.post('/courses/:courseId/modules/:moduleId/lessons/new',            upload.single('audio'), teacherViewController.handleNewLesson);
+router.post('/courses/:courseId/modules/:moduleId/lessons/new',            upload.single('audio'), csrfAfterMultipart, teacherViewController.handleNewLesson);
 router.get('/courses/:courseId/modules/:moduleId/lessons/:lessonId/edit',  teacherViewController.showEditLesson);
-router.post('/courses/:courseId/modules/:moduleId/lessons/:lessonId/edit', upload.single('audio'), teacherViewController.handleEditLesson);
+router.post('/courses/:courseId/modules/:moduleId/lessons/:lessonId/edit', upload.single('audio'), csrfAfterMultipart, teacherViewController.handleEditLesson);
 router.post('/courses/:courseId/modules/:moduleId/lessons/:lessonId/delete', teacherViewController.handleDeleteLesson);
 
 // Quiz
