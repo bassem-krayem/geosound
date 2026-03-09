@@ -122,8 +122,9 @@ dist
 # TernJS port file
 .tern-port
 
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
+# Uploaded audio files – keep directory structure via .gitkeep
+uploads/audio/*
+!uploads/audio/.gitkeep
 
 # yarn v3
 .pnp.*

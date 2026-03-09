@@ -1,9 +1,19 @@
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
+
+// Ensure the upload directory exists (works regardless of the process CWD)
+const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads', 'audio');
+try {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+} catch (err) {
+  console.error(`[upload] Failed to create upload directory "${UPLOAD_DIR}":`, err.message);
+  throw err;
+}
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, 'uploads/audio');
+    cb(null, UPLOAD_DIR);
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
