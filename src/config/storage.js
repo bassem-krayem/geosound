@@ -1,4 +1,4 @@
-const { S3Client } = require('@aws-sdk/client-s3');
+const { S3Client, HeadBucketCommand } = require('@aws-sdk/client-s3');
 
 /**
  * Creates and returns an S3Client configured for Linode Object Storage.
@@ -40,4 +40,45 @@ const createS3Client = () => {
   });
 };
 
-module.exports = { createS3Client };
+/**
+ * Validates the Linode Object Storage configuration by performing a HeadBucket
+ * call against the configured bucket. Call this once at server startup to catch
+ * misconfigured credentials or a wrong cluster before the first upload attempt.
+ *
+ * Logs a clear diagnostic message on success or failure, including the exact
+ * endpoint and a masked prefix of the access key so you can verify the right
+ * credentials are being used without exposing the full key.
+ */
+const validateLinodeStorage = async () => {
+  const cluster = (process.env.LINODE_STORAGE_CLUSTER || '').trim();
+  const bucket  = (process.env.LINODE_STORAGE_BUCKET  || '').trim();
+  const key     = (process.env.LINODE_STORAGE_ACCESS_KEY || '').trim();
+  const maskedKey = key.length > 4 ? `${key.slice(0, 4)}…` : '(empty)';
+  const endpoint = `https://${cluster}.linodeobjects.com`;
+
+  console.log(`[storage] Validating Linode Object Storage…`);
+  console.log(`[storage]   endpoint  : ${endpoint}`);
+  console.log(`[storage]   bucket    : ${bucket}`);
+  console.log(`[storage]   access key: ${maskedKey}`);
+
+  try {
+    const s3 = createS3Client();
+    await s3.send(new HeadBucketCommand({ Bucket: bucket }));
+    console.log(`[storage] ✓ Linode Object Storage connection OK — uploads will go to ${endpoint}/${bucket}`);
+  } catch (err) {
+    const code = err.name || err.Code || err.$metadata?.httpStatusCode;
+    console.error(`[storage] ✗ Linode Object Storage validation FAILED (${code}: ${err.message})`);
+    if (/InvalidAccessKeyId|InvalidAccessKey|AuthorizationQueryParametersError/i.test(String(code) + String(err.message))) {
+      console.error(`[storage]   ➜ The access key "${maskedKey}" was not found on Linode.`);
+      console.error(`[storage]   ➜ Make sure LINODE_STORAGE_ACCESS_KEY and LINODE_STORAGE_SECRET_KEY`);
+      console.error(`[storage]   ➜ are "Object Storage Access Keys" (Linode Cloud Manager → Object Storage → Access Keys),`);
+      console.error(`[storage]   ➜ NOT your Linode account API token.`);
+    } else if (/NoSuchBucket|404/.test(String(code) + String(err.message))) {
+      console.error(`[storage]   ➜ Bucket "${bucket}" not found in cluster "${cluster}".`);
+      console.error(`[storage]   ➜ Check LINODE_STORAGE_BUCKET and LINODE_STORAGE_CLUSTER match what you created in Linode.`);
+    }
+    console.error(`[storage]   ➜ Uploads will fail until this is resolved. Check your .env file.`);
+  }
+};
+
+module.exports = { createS3Client, validateLinodeStorage };
