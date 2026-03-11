@@ -1,0 +1,92 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main id="main-content">
+  <div class="container">
+    <div class="form-page">
+
+      <%- include('../partials/flash') %>
+
+      <!-- مسار التنقل -->
+      <ol class="breadcrumb" aria-label="مسار التنقل">
+        <li><a href="/teacher/dashboard">لوحة التحكم</a></li>
+        <li><a href="/teacher/courses/<%= courseId %>"><%= courseTitle %></a></li>
+        <li><%= isEdit ? 'تعديل الدرس' : 'درس جديد' %></li>
+      </ol>
+
+      <h1 class="mb-3"><%= isEdit ? 'تعديل الدرس' : 'إضافة درس' %></h1>
+
+      <div class="card">
+        <div class="card-body">
+          <form
+            action="<%= isEdit ? '/teacher/courses/' + courseId + '/modules/' + moduleId + '/lessons/' + lesson._id + '/edit' : '/teacher/courses/' + courseId + '/modules/' + moduleId + '/lessons/new' %>"
+            method="POST"
+            enctype="multipart/form-data"
+            novalidate
+            aria-label="<%= isEdit ? 'نموذج تعديل الدرس' : 'نموذج إضافة الدرس' %>"
+          >
+            <%- include('../partials/csrf') %>
+            <div class="form-group">
+              <label class="form-label" for="title">عنوان الدرس <span aria-hidden="true" class="text-danger">*</span></label>
+              <input
+                class="form-control"
+                type="text"
+                id="title"
+                name="title"
+                required
+                aria-required="true"
+                value="<%= typeof lesson !== 'undefined' && lesson.title ? lesson.title : '' %>"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="description">الوصف</label>
+              <textarea class="form-control" id="description" name="description"><%= typeof lesson !== 'undefined' && lesson.description ? lesson.description : '' %></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="audio">الملف الصوتي <span class="text-muted" style="font-weight:400">(MP3, WAV, OGG, AAC – حجم أقصى 50 ميغابايت)</span></label>
+              <input
+                class="form-control"
+                type="file"
+                id="audio"
+                name="audio"
+                accept="audio/*"
+                aria-describedby="audio-hint"
+              />
+              <% if (isEdit && lesson && lesson.audioUrl) { %>
+                <p class="form-hint" id="audio-hint">
+                  الصوت الحالي: <a href="<%= lesson.audioUrl %>" target="_blank">استمع</a>.
+                  ارفع ملفاً جديداً لاستبداله.
+                </p>
+              <% } else { %>
+                <span class="form-hint" id="audio-hint">ارفع التسجيل الصوتي لهذا الدرس.</span>
+              <% } %>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="order">ترتيب العرض</label>
+              <input
+                class="form-control"
+                type="number"
+                id="order"
+                name="order"
+                min="0"
+                value="<%= typeof lesson !== 'undefined' && lesson.order !== undefined ? lesson.order : 0 %>"
+                style="max-width:120px"
+              />
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="submit" class="btn btn-primary"><%= isEdit ? 'حفظ التغييرات' : 'إضافة الدرس' %></button>
+              <a href="/teacher/courses/<%= courseId %>" class="btn btn-secondary">إلغاء</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

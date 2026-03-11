@@ -1,0 +1,54 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main id="main-content">
+  <div class="container">
+
+    <div class="page-header">
+      <div>
+        <h1>استعرض الدورات</h1>
+        <p class="text-muted">ابحث عن دورة جغرافية وابدأ الاستماع</p>
+      </div>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <% if (courses.length === 0) { %>
+      <div class="alert alert-info">لا توجد دورات متاحة حتى الآن. تابعنا قريباً!</div>
+    <% } else { %>
+      <div class="grid grid-2">
+        <% courses.forEach(course => { %>
+          <article class="course-card">
+            <div class="course-card-body">
+              <h3><%= course.title %></h3>
+              <p><%= course.description || 'لا يوجد وصف.' %></p>
+              <p class="text-muted mt-1" style="font-size:.85rem">
+                👨‍🏫 <%= course.teacher ? course.teacher.name : 'معلم غير معروف' %>
+              </p>
+            </div>
+            <div class="course-card-footer">
+              <% if (user) { %>
+                <% const enrolled = enrolledIds && enrolledIds.includes(course._id.toString()); %>
+                <% if (enrolled) { %>
+                  <a href="/courses/<%= course._id %>" class="btn btn-primary btn-sm">متابعة التعلم</a>
+                  <span class="tag tag-unlocked">مسجّل</span>
+                <% } else { %>
+                  <form action="/courses/<%= course._id %>/enroll" method="POST" style="margin:0">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button type="submit" class="btn btn-success btn-sm">التسجيل</button>
+                  </form>
+                  <a href="/courses/<%= course._id %>" class="btn btn-secondary btn-sm">معاينة</a>
+                <% } %>
+              <% } else { %>
+                <a href="/login" class="btn btn-primary btn-sm">سجّل الدخول للانضمام</a>
+              <% } %>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    <% } %>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

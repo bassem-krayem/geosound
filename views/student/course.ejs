@@ -1,0 +1,130 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main id="main-content">
+  <div class="container">
+
+    <%- include('../partials/flash') %>
+
+    <!-- مسار التنقل -->
+    <ol class="breadcrumb" aria-label="مسار التنقل">
+      <li><a href="/courses">الدورات</a></li>
+      <li><%= course.title %></li>
+    </ol>
+
+    <div class="page-header">
+      <div>
+        <h1><%= course.title %></h1>
+        <% if (course.description) { %>
+          <p class="text-muted"><%= course.description %></p>
+        <% } %>
+        <p class="text-muted" style="font-size:.85rem">
+          👨‍🏫 يدرّسه <strong><%= course.teacher ? course.teacher.name : 'غير معروف' %></strong>
+        </p>
+      </div>
+      <% if (user && !enrolled) { %>
+        <form action="/courses/<%= course._id %>/enroll" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button type="submit" class="btn btn-success">التسجيل في الدورة</button>
+        </form>
+      <% } else if (user && enrolled) { %>
+        <span class="tag tag-unlocked" style="font-size:1rem;padding:.4rem 1rem">✓ مسجّل</span>
+      <% } %>
+    </div>
+
+    <!-- شريط التقدم -->
+    <% if (user && enrolled && progressData) { %>
+      <div class="card mb-3" aria-label="تقدّمك في الدورة">
+        <div class="card-body">
+          <div class="d-flex align-center gap-2 flex-wrap">
+            <strong style="flex-shrink:0">تقدّمك:</strong>
+            <div style="flex:1;min-width:120px">
+              <div class="progress-bar-wrap">
+                <div
+                  class="progress-bar-fill <%= progressData.percent === 100 ? 'full' : '' %>"
+                  style="width:<%= progressData.percent %>%"
+                  role="progressbar"
+                  aria-valuenow="<%= progressData.percent %>"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-label="<%= progressData.percent %>% مكتمل"
+                ></div>
+              </div>
+            </div>
+            <span><%= progressData.completed %> / <%= progressData.total %> درس مكتمل</span>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- الوحدات والدروس -->
+    <% if (!modules || modules.length === 0) { %>
+      <div class="alert alert-info">لا توجد وحدات في هذه الدورة بعد.</div>
+    <% } else { %>
+      <% modules.forEach((mod, mIdx) => { %>
+        <div class="module-block">
+          <button
+            class="module-header"
+            aria-expanded="true"
+            aria-controls="module-body-<%= mod._id %>"
+          >
+            <h3>
+              <span aria-hidden="true" style="font-size:.9rem;opacity:.6">الوحدة <%= mIdx + 1 %></span><br/>
+              <%= mod.title %>
+            </h3>
+            <span class="chevron" aria-hidden="true">▼</span>
+          </button>
+
+          <div id="module-body-<%= mod._id %>">
+            <% if (!mod.lessons || mod.lessons.length === 0) { %>
+              <p style="padding:.85rem 1.25rem;color:var(--text-muted);font-size:.9rem">لا توجد دروس في هذه الوحدة بعد.</p>
+            <% } else { %>
+              <ul class="lesson-list" aria-label="دروس <%= mod.title %>">
+                <% mod.lessons.forEach((lesson, lIdx) => {
+                  const lpData = progressData && progressData.lessons
+                    ? progressData.lessons.find(lp => lp.lesson && (lp.lesson._id || lp.lesson).toString() === lesson._id.toString())
+                    : null;
+                  const isCompleted = lpData && lpData.completed;
+                  const isFirst = lIdx === 0;
+                  const prevLesson = lIdx > 0 ? mod.lessons[lIdx - 1] : null;
+                  const prevDone = prevLesson
+                    ? (progressData && progressData.lessons
+                        ? !!(progressData.lessons.find(lp => (lp.lesson._id || lp.lesson).toString() === prevLesson._id.toString()) || {}).completed
+                        : false)
+                    : true;
+                  const isAccessible = enrolled && (isFirst || prevDone);
+                %>
+                  <li class="lesson-item <%= isCompleted ? 'lesson-complete' : '' %> <%= !isAccessible ? 'lesson-locked' : '' %>">
+                    <span class="lesson-icon" aria-hidden="true">
+                      <% if (isCompleted) { %>✅
+                      <% } else if (!isAccessible) { %>🔒
+                      <% } else { %>🎧<% } %>
+                    </span>
+                    <div class="lesson-info">
+                      <h4><%= lesson.title %></h4>
+                      <% if (lpData && lpData.score !== null && lpData.score !== undefined) { %>
+                        <p>أفضل نتيجة: <strong><%= lpData.score %>%</strong></p>
+                      <% } %>
+                    </div>
+                    <% if (isAccessible) { %>
+                      <a
+                        href="/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>"
+                        class="btn btn-sm <%= isCompleted ? 'btn-secondary' : 'btn-primary' %>"
+                        aria-label="<%= isCompleted ? 'مراجعة' : 'ابدأ' %> الدرس: <%= lesson.title %>"
+                      ><%= isCompleted ? 'مراجعة' : 'ابدأ' %></a>
+                    <% } else { %>
+                      <span class="tag tag-locked" aria-label="درس مقفل">🔒 مقفل</span>
+                    <% } %>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

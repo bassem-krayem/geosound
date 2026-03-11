@@ -1,0 +1,13 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<main id="main-content">
+  <div class="container" style="max-width:640px;margin-top:4rem;text-align:center">
+    <div style="font-size:4rem;margin-bottom:1rem" aria-hidden="true"><%= statusCode === 404 ? '🔍' : '⚠️' %></div>
+    <h1><%= statusCode %> – <%= message %></h1>
+    <p class="text-muted mt-2">عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى أو العودة للرئيسية.</p>
+    <a href="/" class="btn btn-primary mt-3">الصفحة الرئيسية</a>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

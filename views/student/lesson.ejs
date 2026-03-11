@@ -1,0 +1,99 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main id="main-content">
+  <div class="container">
+
+    <%- include('../partials/flash') %>
+
+    <!-- مسار التنقل -->
+    <ol class="breadcrumb" aria-label="مسار التنقل">
+      <li><a href="/courses">الدورات</a></li>
+      <li><a href="/courses/<%= courseId %>"><%= courseTitle %></a></li>
+      <li><%= lesson.title %></li>
+    </ol>
+
+    <div class="page-header">
+      <div>
+        <h1><%= lesson.title %></h1>
+        <% if (lesson.description) { %><p class="text-muted"><%= lesson.description %></p><% } %>
+      </div>
+    </div>
+
+    <!-- قسم الصوت -->
+    <section class="audio-section" aria-labelledby="audio-heading">
+      <h2 id="audio-heading">🎧 صوت الدرس</h2>
+      <!-- منطقة إعلان مباشر لحالة الصوت -->
+      <div id="audio-status" aria-live="polite" aria-atomic="true" class="hidden" role="status"></div>
+
+      <% if (lesson.audioUrl) { %>
+        <div class="audio-player">
+          <audio
+            controls
+            preload="metadata"
+            aria-label="صوت الدرس: <%= lesson.title %>"
+          >
+            <source src="<%= lesson.audioUrl %>" />
+            متصفحك لا يدعم عنصر الصوت.
+          </audio>
+        </div>
+        <p class="form-hint">استخدم مفتاح المسافة للتشغيل/الإيقاف. مفاتيح الأسهم للتنقل.</p>
+      <% } else { %>
+        <div class="alert alert-warning">لم يتم رفع صوت لهذا الدرس بعد.</div>
+      <% } %>
+    </section>
+
+    <!-- قسم الاختبار -->
+    <section class="quiz-section" aria-labelledby="quiz-heading">
+      <h2 id="quiz-heading">📝 اختبار الدرس</h2>
+      <p class="text-muted mb-3">أجب على جميع الأسئلة الـ5. تحتاج إلى <strong>70%</strong> أو أكثر لفتح الدرس التالي.</p>
+
+      <% if (!quiz) { %>
+        <div class="alert alert-info">لم يتم إعداد اختبار لهذا الدرس بعد.</div>
+      <% } else if (alreadyPassed) { %>
+        <div class="alert alert-success" role="status">
+          ✅ لقد اجتزت هذا الدرس بالفعل! أفضل نتيجتك: <strong><%= bestScore %>%</strong>.
+          يمكنك إعادة الاختبار أدناه.
+        </div>
+      <% } %>
+
+      <% if (quiz) { %>
+        <!-- حاوية نتيجة الاختبار - تُملأ بـ JS بعد الإرسال -->
+        <div id="quiz-result-container" hidden aria-live="polite"></div>
+
+        <form
+          id="quiz-form"
+          data-submit-url="/api/courses/<%= courseId %>/modules/<%= moduleId %>/lessons/<%= lesson._id %>/quiz/submit"
+          novalidate
+          aria-label="نموذج الاختبار"
+        >
+          <% quiz.questions.forEach((q, i) => { %>
+            <div class="question-block" data-question="<%= i %>">
+              <h3><span aria-hidden="true"><%= i + 1 %>.</span> <%= q.text %></h3>
+              <ul class="option-list" role="radiogroup" aria-label="خيارات السؤال <%= i + 1 %>">
+                <% q.options.forEach((opt, j) => { %>
+                  <li class="option-item">
+                    <label>
+                      <input
+                        type="radio"
+                        name="q<%= i %>"
+                        value="<%= j %>"
+                        aria-label="<%= opt %>"
+                      />
+                      <span><%= opt %></span>
+                    </label>
+                  </li>
+              <% }) %>
+            </ul>
+          </div>
+        <% }) %>
+
+          <button type="submit" class="btn btn-primary btn-lg">تقديم الاختبار</button>
+        </form>
+      <% } %>
+    </section>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,48 @@
+<%- include('../partials/head') %>
+
+<main id="main-content" class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>🌍 جيوساوند</h1>
+      <p>مرحباً بعودتك! يرجى تسجيل الدخول للمتابعة.</p>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <form action="/login" method="POST" novalidate aria-label="نموذج تسجيل الدخول">
+      <%- include('../partials/csrf') %>
+      <div class="form-group">
+        <label class="form-label" for="email">البريد الإلكتروني</label>
+        <input
+          class="form-control"
+          type="email"
+          id="email"
+          name="email"
+          autocomplete="email"
+          required
+          aria-required="true"
+          value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">كلمة المرور</label>
+        <input
+          class="form-control"
+          type="password"
+          id="password"
+          name="password"
+          autocomplete="current-password"
+          required
+          aria-required="true"
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">تسجيل الدخول</button>
+    </form>
+
+    <p class="auth-divider">ليس لديك حساب؟ <a href="/register">سجّل هنا</a></p>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
