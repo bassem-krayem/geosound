@@ -1,4 +1,4 @@
-const { S3Client, HeadBucketCommand } = require('@aws-sdk/client-s3');
+const { S3Client, ListObjectsV2Command } = require('@aws-sdk/client-s3');
 
 /**
  * Creates and returns an S3Client configured for Linode Object Storage.
@@ -41,13 +41,13 @@ const createS3Client = () => {
 };
 
 /**
- * Validates the Linode Object Storage configuration by performing a HeadBucket
- * call against the configured bucket. Call this once at server startup to catch
- * misconfigured credentials or a wrong cluster before the first upload attempt.
+ * Validates the Linode Object Storage configuration by listing bucket objects
+ * (MaxKeys: 1). Using ListObjectsV2 (a GET request) instead of HeadBucket
+ * (a HEAD request) ensures that on failure the response contains a parseable
+ * XML error body, giving us the exact error code (InvalidAccessKeyId, etc.).
  *
  * Logs a clear diagnostic message on success or failure, including the exact
- * endpoint and a masked prefix of the access key so you can verify the right
- * credentials are being used without exposing the full key.
+ * endpoint, HTTP status code, and a masked prefix of the access key.
  */
 const validateLinodeStorage = async () => {
   const cluster = (process.env.LINODE_STORAGE_CLUSTER || '').trim();
@@ -63,19 +63,34 @@ const validateLinodeStorage = async () => {
 
   try {
     const s3 = createS3Client();
-    await s3.send(new HeadBucketCommand({ Bucket: bucket }));
+    await s3.send(new ListObjectsV2Command({ Bucket: bucket, MaxKeys: 1 }));
     console.log(`[storage] ✓ Linode Object Storage connection OK — uploads will go to ${endpoint}/${bucket}`);
   } catch (err) {
-    const code = err.name || err.Code || err.$metadata?.httpStatusCode;
-    console.error(`[storage] ✗ Linode Object Storage validation FAILED (${code}: ${err.message})`);
-    if (/InvalidAccessKeyId|InvalidAccessKey|AuthorizationQueryParametersError/i.test(String(code) + String(err.message))) {
-      console.error(`[storage]   ➜ The access key "${maskedKey}" was not found on Linode.`);
-      console.error(`[storage]   ➜ Make sure LINODE_STORAGE_ACCESS_KEY and LINODE_STORAGE_SECRET_KEY`);
+    const httpStatus = err.$metadata?.httpStatusCode;
+    const errCode    = err.name || err.Code || err.code || httpStatus || 'Unknown';
+    const causeMsg   = err.cause?.message || err.cause?.code || '';
+
+    console.error(`[storage] ✗ Linode Object Storage validation FAILED`);
+    console.error(`[storage]   error     : ${errCode}`);
+    console.error(`[storage]   message   : ${err.message}`);
+    if (httpStatus) console.error(`[storage]   HTTP      : ${httpStatus}`);
+    if (causeMsg)   console.error(`[storage]   cause     : ${causeMsg}`);
+
+    const combined = `${errCode} ${err.message} ${causeMsg}`;
+    if (/InvalidAccessKeyId|InvalidAccessKey|AuthorizationQueryParametersError|InvalidSecurity/i.test(combined)
+        || httpStatus === 403) {
+      console.error(`[storage]   ➜ Access denied — key "${maskedKey}" not accepted by Linode.`);
+      console.error(`[storage]   ➜ Make sure LINODE_STORAGE_ACCESS_KEY / LINODE_STORAGE_SECRET_KEY`);
       console.error(`[storage]   ➜ are "Object Storage Access Keys" (Linode Cloud Manager → Object Storage → Access Keys),`);
       console.error(`[storage]   ➜ NOT your Linode account API token.`);
-    } else if (/NoSuchBucket|404/.test(String(code) + String(err.message))) {
+      console.error(`[storage]   ➜ Also confirm the key has Read/Write access to bucket "${bucket}".`);
+    } else if (/NoSuchBucket/i.test(combined) || httpStatus === 404) {
       console.error(`[storage]   ➜ Bucket "${bucket}" not found in cluster "${cluster}".`);
       console.error(`[storage]   ➜ Check LINODE_STORAGE_BUCKET and LINODE_STORAGE_CLUSTER match what you created in Linode.`);
+    } else if (!httpStatus) {
+      // No HTTP status means the request never completed (DNS / network error)
+      console.error(`[storage]   ➜ Network error — could not reach ${endpoint}.`);
+      console.error(`[storage]   ➜ Check your internet connection and that LINODE_STORAGE_CLUSTER is correct.`);
     }
     console.error(`[storage]   ➜ Uploads will fail until this is resolved. Check your .env file.`);
   }
