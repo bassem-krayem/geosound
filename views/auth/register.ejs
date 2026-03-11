@@ -3,16 +3,16 @@
 <main id="main-content" class="auth-wrapper">
   <div class="auth-card">
     <div class="auth-logo">
-      <h1>🌍 GeoSound</h1>
-      <p>Create your account to start learning.</p>
+      <h1>🌍 جيوساوند</h1>
+      <p>أنشئ حسابك لبدء التعلم.</p>
     </div>
 
     <%- include('../partials/flash') %>
 
-    <form action="/register" method="POST" novalidate aria-label="Registration form">
+    <form action="/register" method="POST" novalidate aria-label="نموذج إنشاء الحساب">
       <%- include('../partials/csrf') %>
       <div class="form-group">
-        <label class="form-label" for="name">Full name</label>
+        <label class="form-label" for="name">الاسم الكامل</label>
         <input
           class="form-control"
           type="text"
@@ -26,7 +26,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="email">Email address</label>
+        <label class="form-label" for="email">البريد الإلكتروني</label>
         <input
           class="form-control"
           type="email"
@@ -40,7 +40,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="password">Password <span class="text-muted" style="font-weight:400">(min. 6 characters)</span></label>
+        <label class="form-label" for="password">كلمة المرور <span class="text-muted" style="font-weight:400">(6 أحرف على الأقل)</span></label>
         <input
           class="form-control"
           type="password"
@@ -54,18 +54,18 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="role">I am a…</label>
+        <label class="form-label" for="role">أنا...</label>
         <select class="form-control" id="role" name="role" required aria-required="true">
-          <option value="" disabled <%= typeof formData === 'undefined' || !formData.role ? 'selected' : '' %>>Choose your role</option>
-          <option value="student" <%= typeof formData !== 'undefined' && formData.role === 'student' ? 'selected' : '' %>>Student</option>
-          <option value="teacher" <%= typeof formData !== 'undefined' && formData.role === 'teacher' ? 'selected' : '' %>>Teacher</option>
+          <option value="" disabled <%= typeof formData === 'undefined' || !formData.role ? 'selected' : '' %>>اختر دورك</option>
+          <option value="student" <%= typeof formData !== 'undefined' && formData.role === 'student' ? 'selected' : '' %>>طالب</option>
+          <option value="teacher" <%= typeof formData !== 'undefined' && formData.role === 'teacher' ? 'selected' : '' %>>معلم</option>
         </select>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account</button>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">إنشاء حساب</button>
     </form>
 
-    <p class="auth-divider">Already have an account? <a href="/login">Sign in here</a></p>
+    <p class="auth-divider">لديك حساب بالفعل؟ <a href="/login">سجّل الدخول هنا</a></p>
   </div>
 </main>
 

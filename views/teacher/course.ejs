@@ -6,9 +6,9 @@
 
     <%- include('../partials/flash') %>
 
-    <!-- Breadcrumb -->
-    <ol class="breadcrumb" aria-label="Breadcrumb">
-      <li><a href="/teacher/dashboard">Dashboard</a></li>
+    <!-- مسار التنقل -->
+    <ol class="breadcrumb" aria-label="مسار التنقل">
+      <li><a href="/teacher/dashboard">لوحة التحكم</a></li>
       <li><%= course.title %></li>
     </ol>
 
@@ -18,14 +18,14 @@
         <% if (course.description) { %><p class="text-muted"><%= course.description %></p><% } %>
       </div>
       <div class="d-flex gap-1 flex-wrap">
-        <a href="/teacher/courses/<%= course._id %>/edit" class="btn btn-secondary btn-sm">Edit Course</a>
-        <a href="/teacher/courses/<%= course._id %>/modules/new" class="btn btn-primary">+ Add Module</a>
+        <a href="/teacher/courses/<%= course._id %>/edit" class="btn btn-secondary btn-sm">تعديل الدورة</a>
+        <a href="/teacher/courses/<%= course._id %>/modules/new" class="btn btn-primary">+ إضافة وحدة</a>
       </div>
     </div>
 
-    <!-- Modules -->
+    <!-- الوحدات -->
     <% if (!modules || modules.length === 0) { %>
-      <div class="alert alert-info">No modules yet. <a href="/teacher/courses/<%= course._id %>/modules/new">Add your first module</a>.</div>
+      <div class="alert alert-info">لا توجد وحدات بعد. <a href="/teacher/courses/<%= course._id %>/modules/new">أضف أول وحدة</a>.</div>
     <% } else { %>
       <% modules.forEach((mod, mIdx) => { %>
         <div class="module-block">
@@ -35,40 +35,40 @@
             aria-controls="mod-body-<%= mod._id %>"
           >
             <div>
-              <h3>Module <%= mIdx + 1 %>: <%= mod.title %></h3>
+              <h3>الوحدة <%= mIdx + 1 %>: <%= mod.title %></h3>
               <% if (mod.description) { %><p style="font-size:.85rem;color:var(--text-muted);margin:0"><%= mod.description %></p><% } %>
             </div>
             <div class="d-flex gap-1 align-center flex-wrap" style="flex-shrink:0">
-              <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/new" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">+ Lesson</a>
-              <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/edit" class="btn btn-secondary btn-sm" onclick="event.stopPropagation()">Edit</a>
+              <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/new" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">+ درس</a>
+              <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/edit" class="btn btn-secondary btn-sm" onclick="event.stopPropagation()">تعديل</a>
               <form action="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/delete" method="POST" style="margin:0" onclick="event.stopPropagation()">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                <button type="submit" class="btn btn-danger btn-sm" data-confirm="Delete module '<%= mod.title %>' and all its lessons?">Delete</button>
+                <button type="submit" class="btn btn-danger btn-sm" data-confirm="حذف الوحدة '<%= mod.title %>' وجميع دروسها؟">حذف</button>
               </form>
-              <span class="chevron" aria-hidden="true" style="margin-left:.25rem">▼</span>
+              <span class="chevron" aria-hidden="true" style="margin-right:.25rem">▼</span>
             </div>
           </button>
 
           <div id="mod-body-<%= mod._id %>">
             <% if (!mod.lessons || mod.lessons.length === 0) { %>
-              <p style="padding:.85rem 1.25rem;color:var(--text-muted);font-size:.9rem">No lessons yet. <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/new">Add a lesson</a>.</p>
+              <p style="padding:.85rem 1.25rem;color:var(--text-muted);font-size:.9rem">لا توجد دروس بعد. <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/new">أضف درساً</a>.</p>
             <% } else { %>
-              <ul class="lesson-list" aria-label="Lessons in <%= mod.title %>">
+              <ul class="lesson-list" aria-label="دروس <%= mod.title %>">
                 <% mod.lessons.forEach((lesson, lIdx) => { %>
                   <li class="lesson-item">
                     <span class="lesson-icon" aria-hidden="true"><%= lesson.audioUrl ? '🎧' : '📄' %></span>
                     <div class="lesson-info">
                       <h4><%= lesson.title %></h4>
                       <p>
-                        <%= lesson.audioUrl ? '✓ Audio uploaded' : '⚠ No audio' %>
+                        <%= lesson.audioUrl ? '✓ تم رفع الصوت' : '⚠ لا يوجد صوت' %>
                       </p>
                     </div>
                     <div class="d-flex gap-1 flex-wrap">
-                      <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>/quiz" class="btn btn-accent btn-sm">Quiz</a>
-                      <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>/edit" class="btn btn-secondary btn-sm">Edit</a>
+                      <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>/quiz" class="btn btn-accent btn-sm">اختبار</a>
+                      <a href="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>/edit" class="btn btn-secondary btn-sm">تعديل</a>
                       <form action="/teacher/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>/delete" method="POST" style="margin:0">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        <button type="submit" class="btn btn-danger btn-sm" data-confirm="Delete lesson '<%= lesson.title %>'?">Delete</button>
+                        <button type="submit" class="btn btn-danger btn-sm" data-confirm="حذف الدرس '<%= lesson.title %>'؟">حذف</button>
                       </form>
                     </div>
                   </li>

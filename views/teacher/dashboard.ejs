@@ -6,39 +6,39 @@
 
     <div class="page-header">
       <div>
-        <h1>Teacher Dashboard</h1>
-        <p class="text-muted">Welcome, <strong><%= user.name %></strong></p>
+        <h1>لوحة تحكم المعلم</h1>
+        <p class="text-muted">مرحباً، <strong><%= user.name %></strong></p>
       </div>
-      <a href="/teacher/courses/new" class="btn btn-primary">+ New Course</a>
+      <a href="/teacher/courses/new" class="btn btn-primary">+ دورة جديدة</a>
     </div>
 
     <%- include('../partials/flash') %>
 
-    <!-- Stats -->
-    <div class="stat-cards mb-4" aria-label="Teaching statistics">
+    <!-- إحصاءات -->
+    <div class="stat-cards mb-4" aria-label="إحصاءات التدريس">
       <div class="stat-card">
         <div class="stat-number"><%= stats.courses %></div>
-        <div class="stat-label">Courses</div>
+        <div class="stat-label">الدورات</div>
       </div>
       <div class="stat-card">
         <div class="stat-number"><%= stats.modules %></div>
-        <div class="stat-label">Modules</div>
+        <div class="stat-label">الوحدات</div>
       </div>
       <div class="stat-card">
         <div class="stat-number"><%= stats.lessons %></div>
-        <div class="stat-label">Lessons</div>
+        <div class="stat-label">الدروس</div>
       </div>
       <div class="stat-card">
         <div class="stat-number"><%= stats.quizzes %></div>
-        <div class="stat-label">Quizzes</div>
+        <div class="stat-label">الاختبارات</div>
       </div>
     </div>
 
-    <h2 class="mb-3">Your Courses</h2>
+    <h2 class="mb-3">دوراتك</h2>
 
     <% if (courses.length === 0) { %>
       <div class="alert alert-info">
-        You haven't created any courses yet. <a href="/teacher/courses/new">Create your first course</a>!
+        لم تنشئ أي دورات بعد. <a href="/teacher/courses/new">أنشئ أول دورة لك</a>!
       </div>
     <% } else { %>
       <div class="grid grid-2">
@@ -46,18 +46,18 @@
           <article class="course-card">
             <div class="course-card-body">
               <h3><%= course.title %></h3>
-              <p><%= course.description || 'No description.' %></p>
+              <p><%= course.description || 'لا يوجد وصف.' %></p>
             </div>
             <div class="course-card-footer">
-              <a href="/teacher/courses/<%= course._id %>" class="btn btn-primary btn-sm">Manage</a>
-              <a href="/teacher/courses/<%= course._id %>/edit" class="btn btn-secondary btn-sm">Edit</a>
+              <a href="/teacher/courses/<%= course._id %>" class="btn btn-primary btn-sm">إدارة</a>
+              <a href="/teacher/courses/<%= course._id %>/edit" class="btn btn-secondary btn-sm">تعديل</a>
               <form action="/teacher/courses/<%= course._id %>/delete" method="POST" style="margin:0">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                 <button
                   type="submit"
                   class="btn btn-danger btn-sm"
-                  data-confirm="Delete course '<%= course.title %>' and all its content? This cannot be undone."
-                >Delete</button>
+                  data-confirm="حذف الدورة '<%= course.title %>' وكل محتواها؟ لا يمكن التراجع عن هذا."
+                >حذف</button>
               </form>
             </div>
           </article>

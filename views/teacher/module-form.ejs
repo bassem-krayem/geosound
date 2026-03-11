@@ -7,14 +7,14 @@
 
       <%- include('../partials/flash') %>
 
-      <!-- Breadcrumb -->
-      <ol class="breadcrumb" aria-label="Breadcrumb">
-        <li><a href="/teacher/dashboard">Dashboard</a></li>
+      <!-- مسار التنقل -->
+      <ol class="breadcrumb" aria-label="مسار التنقل">
+        <li><a href="/teacher/dashboard">لوحة التحكم</a></li>
         <li><a href="/teacher/courses/<%= courseId %>"><%= courseTitle %></a></li>
-        <li><%= isEdit ? 'Edit Module' : 'New Module' %></li>
+        <li><%= isEdit ? 'تعديل الوحدة' : 'وحدة جديدة' %></li>
       </ol>
 
-      <h1 class="mb-3"><%= isEdit ? 'Edit Module' : 'Add Module' %></h1>
+      <h1 class="mb-3"><%= isEdit ? 'تعديل الوحدة' : 'إضافة وحدة' %></h1>
 
       <div class="card">
         <div class="card-body">
@@ -22,11 +22,11 @@
             action="<%= isEdit ? '/teacher/courses/' + courseId + '/modules/' + module._id + '/edit' : '/teacher/courses/' + courseId + '/modules/new' %>"
             method="POST"
             novalidate
-            aria-label="<%= isEdit ? 'Edit module form' : 'Create module form' %>"
+            aria-label="<%= isEdit ? 'نموذج تعديل الوحدة' : 'نموذج إضافة الوحدة' %>"
           >
             <%- include('../partials/csrf') %>
             <div class="form-group">
-              <label class="form-label" for="title">Module Title <span aria-hidden="true" class="text-danger">*</span></label>
+              <label class="form-label" for="title">عنوان الوحدة <span aria-hidden="true" class="text-danger">*</span></label>
               <input
                 class="form-control"
                 type="text"
@@ -39,7 +39,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="description">Description</label>
+              <label class="form-label" for="description">الوصف</label>
               <textarea
                 class="form-control"
                 id="description"
@@ -48,7 +48,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="order">Display Order</label>
+              <label class="form-label" for="order">ترتيب العرض</label>
               <input
                 class="form-control"
                 type="number"
@@ -58,12 +58,12 @@
                 value="<%= typeof module !== 'undefined' && module.order !== undefined ? module.order : 0 %>"
                 style="max-width:120px"
               />
-              <span class="form-hint">Lower numbers appear first.</span>
+              <span class="form-hint">الأرقام الأصغر تظهر أولاً.</span>
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
-              <button type="submit" class="btn btn-primary"><%= isEdit ? 'Save Changes' : 'Add Module' %></button>
-              <a href="/teacher/courses/<%= courseId %>" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary"><%= isEdit ? 'حفظ التغييرات' : 'إضافة الوحدة' %></button>
+              <a href="/teacher/courses/<%= courseId %>" class="btn btn-secondary">إلغاء</a>
             </div>
           </form>
         </div>

@@ -49,7 +49,7 @@ if (quizForm) {
     e.preventDefault();
     const submitBtn = quizForm.querySelector('[type="submit"]');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
+    submitBtn.textContent = 'جارٍ الإرسال...';
 
     const answers = [];
     const groups = quizForm.querySelectorAll('[data-question]');
@@ -65,9 +65,9 @@ if (quizForm) {
     });
 
     if (!allAnswered) {
-      showQuizError('Please answer all 5 questions before submitting.');
+      showQuizError('يرجى الإجابة على جميع الأسئلة الـ5 قبل الإرسال.');
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Quiz';
+      submitBtn.textContent = 'تقديم الاختبار';
       return;
     }
 
@@ -81,10 +81,10 @@ if (quizForm) {
       renderQuizResult(data.data);
       quizForm.style.display = 'none';
     } else {
-      const msg = (data.errors && data.errors[0]?.msg) || data.message || 'Submission failed.';
+      const msg = (data.errors && data.errors[0]?.msg) || data.message || 'فشل الإرسال.';
       showQuizError(msg);
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Quiz';
+      submitBtn.textContent = 'تقديم الاختبار';
     }
   });
 }
@@ -112,8 +112,8 @@ function renderQuizResult(result) {
       <p>${result.correct} / ${result.total} correct</p>
       <p>${result.message}</p>
       ${result.passed
-        ? '<a href="javascript:location.reload()" class="btn btn-success mt-2">Continue</a>'
-        : '<button type="button" class="btn btn-primary mt-2" onclick="location.reload()">Try Again</button>'}
+        ? '<a href="javascript:location.reload()" class="btn btn-success mt-2">متابعة</a>'
+        : '<button type="button" class="btn btn-primary mt-2" onclick="location.reload()">حاول مرة أخرى</button>'}
     </div>`;
   container.hidden = false;
   container.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -145,7 +145,7 @@ if (quizBuilder) {
       });
       if (!valid) {
         e.preventDefault();
-        alert('Please fill in all question texts.');
+        alert('يرجى ملء جميع نصوص الأسئلة.');
       }
     });
   }
@@ -165,8 +165,8 @@ const audioEl = document.querySelector('.audio-player audio');
 if (audioEl) {
   const liveRegion = document.getElementById('audio-status');
   const announce = (msg) => { if (liveRegion) liveRegion.textContent = msg; };
-  audioEl.addEventListener('play',  () => announce('Audio playing'));
-  audioEl.addEventListener('pause', () => announce('Audio paused'));
-  audioEl.addEventListener('ended', () => announce('Audio finished'));
-  audioEl.addEventListener('error', () => announce('Error loading audio file'));
+  audioEl.addEventListener('play',  () => announce('يعمل الصوت'));
+  audioEl.addEventListener('pause', () => announce('الصوت متوقف'));
+  audioEl.addEventListener('ended', () => announce('انتهى الصوت'));
+  audioEl.addEventListener('error', () => announce('خطأ في تحميل الملف الصوتي'));
 }

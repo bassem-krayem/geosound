@@ -6,9 +6,9 @@
 
     <%- include('../partials/flash') %>
 
-    <!-- Breadcrumb -->
-    <ol class="breadcrumb" aria-label="Breadcrumb">
-      <li><a href="/courses">Courses</a></li>
+    <!-- مسار التنقل -->
+    <ol class="breadcrumb" aria-label="مسار التنقل">
+      <li><a href="/courses">الدورات</a></li>
       <li><a href="/courses/<%= courseId %>"><%= courseTitle %></a></li>
       <li><%= lesson.title %></li>
     </ol>
@@ -20,10 +20,10 @@
       </div>
     </div>
 
-    <!-- Audio Section -->
+    <!-- قسم الصوت -->
     <section class="audio-section" aria-labelledby="audio-heading">
-      <h2 id="audio-heading">🎧 Lesson Audio</h2>
-      <!-- Accessible live region for audio status -->
+      <h2 id="audio-heading">🎧 صوت الدرس</h2>
+      <!-- منطقة إعلان مباشر لحالة الصوت -->
       <div id="audio-status" aria-live="polite" aria-atomic="true" class="hidden" role="status"></div>
 
       <% if (lesson.audioUrl) { %>
@@ -31,46 +31,46 @@
           <audio
             controls
             preload="metadata"
-            aria-label="Lesson audio for: <%= lesson.title %>"
+            aria-label="صوت الدرس: <%= lesson.title %>"
           >
             <source src="<%= lesson.audioUrl %>" />
-            Your browser does not support the audio element.
+            متصفحك لا يدعم عنصر الصوت.
           </audio>
         </div>
-        <p class="form-hint">Use your keyboard's Space bar to play/pause. Arrow keys to seek.</p>
+        <p class="form-hint">استخدم مفتاح المسافة للتشغيل/الإيقاف. مفاتيح الأسهم للتنقل.</p>
       <% } else { %>
-        <div class="alert alert-warning">No audio has been uploaded for this lesson yet.</div>
+        <div class="alert alert-warning">لم يتم رفع صوت لهذا الدرس بعد.</div>
       <% } %>
     </section>
 
-    <!-- Quiz Section -->
+    <!-- قسم الاختبار -->
     <section class="quiz-section" aria-labelledby="quiz-heading">
-      <h2 id="quiz-heading">📝 Lesson Quiz</h2>
-      <p class="text-muted mb-3">Answer all 5 questions. You need <strong>70%</strong> or more to unlock the next lesson.</p>
+      <h2 id="quiz-heading">📝 اختبار الدرس</h2>
+      <p class="text-muted mb-3">أجب على جميع الأسئلة الـ5. تحتاج إلى <strong>70%</strong> أو أكثر لفتح الدرس التالي.</p>
 
       <% if (!quiz) { %>
-        <div class="alert alert-info">No quiz has been set for this lesson yet.</div>
+        <div class="alert alert-info">لم يتم إعداد اختبار لهذا الدرس بعد.</div>
       <% } else if (alreadyPassed) { %>
         <div class="alert alert-success" role="status">
-          ✅ You have already passed this lesson! Your best score: <strong><%= bestScore %>%</strong>.
-          You may retake the quiz below.
+          ✅ لقد اجتزت هذا الدرس بالفعل! أفضل نتيجتك: <strong><%= bestScore %>%</strong>.
+          يمكنك إعادة الاختبار أدناه.
         </div>
       <% } %>
 
       <% if (quiz) { %>
-        <!-- Hidden result container – filled by JS after submission -->
+        <!-- حاوية نتيجة الاختبار - تُملأ بـ JS بعد الإرسال -->
         <div id="quiz-result-container" hidden aria-live="polite"></div>
 
         <form
           id="quiz-form"
           data-submit-url="/api/courses/<%= courseId %>/modules/<%= moduleId %>/lessons/<%= lesson._id %>/quiz/submit"
           novalidate
-          aria-label="Quiz form"
+          aria-label="نموذج الاختبار"
         >
           <% quiz.questions.forEach((q, i) => { %>
             <div class="question-block" data-question="<%= i %>">
               <h3><span aria-hidden="true"><%= i + 1 %>.</span> <%= q.text %></h3>
-              <ul class="option-list" role="radiogroup" aria-label="Options for question <%= i + 1 %>">
+              <ul class="option-list" role="radiogroup" aria-label="خيارات السؤال <%= i + 1 %>">
                 <% q.options.forEach((opt, j) => { %>
                   <li class="option-item">
                     <label>
@@ -88,7 +88,7 @@
           </div>
         <% }) %>
 
-          <button type="submit" class="btn btn-primary btn-lg">Submit Quiz</button>
+          <button type="submit" class="btn btn-primary btn-lg">تقديم الاختبار</button>
         </form>
       <% } %>
     </section>

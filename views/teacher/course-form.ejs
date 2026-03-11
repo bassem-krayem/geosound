@@ -7,13 +7,13 @@
 
       <%- include('../partials/flash') %>
 
-      <!-- Breadcrumb -->
-      <ol class="breadcrumb" aria-label="Breadcrumb">
-        <li><a href="/teacher/dashboard">Dashboard</a></li>
-        <li><%= isEdit ? 'Edit Course' : 'New Course' %></li>
+      <!-- مسار التنقل -->
+      <ol class="breadcrumb" aria-label="مسار التنقل">
+        <li><a href="/teacher/dashboard">لوحة التحكم</a></li>
+        <li><%= isEdit ? 'تعديل الدورة' : 'دورة جديدة' %></li>
       </ol>
 
-      <h1 class="mb-3"><%= isEdit ? 'Edit Course' : 'Create New Course' %></h1>
+      <h1 class="mb-3"><%= isEdit ? 'تعديل الدورة' : 'إنشاء دورة جديدة' %></h1>
 
       <div class="card">
         <div class="card-body">
@@ -21,11 +21,11 @@
             action="<%= isEdit ? '/teacher/courses/' + course._id + '/edit' : '/teacher/courses/new' %>"
             method="POST"
             novalidate
-            aria-label="<%= isEdit ? 'Edit course form' : 'Create course form' %>"
+            aria-label="<%= isEdit ? 'نموذج تعديل الدورة' : 'نموذج إنشاء الدورة' %>"
           >
             <%- include('../partials/csrf') %>
             <div class="form-group">
-              <label class="form-label" for="title">Course Title <span aria-hidden="true" class="text-danger">*</span></label>
+              <label class="form-label" for="title">عنوان الدورة <span aria-hidden="true" class="text-danger">*</span></label>
               <input
                 class="form-control"
                 type="text"
@@ -38,7 +38,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="description">Description</label>
+              <label class="form-label" for="description">الوصف</label>
               <textarea
                 class="form-control"
                 id="description"
@@ -52,8 +52,8 @@
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
-              <button type="submit" class="btn btn-primary"><%= isEdit ? 'Save Changes' : 'Create Course' %></button>
-              <a href="/teacher/dashboard" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary"><%= isEdit ? 'حفظ التغييرات' : 'إنشاء الدورة' %></button>
+              <a href="/teacher/dashboard" class="btn btn-secondary">إلغاء</a>
             </div>
           </form>
         </div>

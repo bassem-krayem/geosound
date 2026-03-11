@@ -7,15 +7,15 @@
 
       <%- include('../partials/flash') %>
 
-      <!-- Breadcrumb -->
-      <ol class="breadcrumb" aria-label="Breadcrumb">
-        <li><a href="/teacher/dashboard">Dashboard</a></li>
+      <!-- مسار التنقل -->
+      <ol class="breadcrumb" aria-label="مسار التنقل">
+        <li><a href="/teacher/dashboard">لوحة التحكم</a></li>
         <li><a href="/teacher/courses/<%= courseId %>"><%= courseTitle %></a></li>
-        <li>Quiz: <%= lessonTitle %></li>
+        <li>اختبار: <%= lessonTitle %></li>
       </ol>
 
-      <h1 class="mb-1"><%= quiz ? 'Edit Quiz' : 'Create Quiz' %></h1>
-      <p class="text-muted mb-3">Lesson: <strong><%= lessonTitle %></strong> &mdash; Exactly 5 questions, 4 options each.</p>
+      <h1 class="mb-1"><%= quiz ? 'تعديل الاختبار' : 'إنشاء الاختبار' %></h1>
+      <p class="text-muted mb-3">الدرس: <strong><%= lessonTitle %></strong> &mdash; 5 أسئلة بالضبط، 4 خيارات لكل سؤال.</p>
 
       <div class="card" id="quiz-builder">
         <div class="card-body">
@@ -24,17 +24,17 @@
             action="/teacher/courses/<%= courseId %>/modules/<%= moduleId %>/lessons/<%= lessonId %>/quiz/<%= quiz ? 'edit' : 'new' %>"
             method="POST"
             novalidate
-            aria-label="Quiz builder form"
+            aria-label="نموذج بناء الاختبار"
           >
             <%- include('../partials/csrf') %>
             <% for (let i = 0; i < 5; i++) {
               const q = (quiz && quiz.questions && quiz.questions[i]) ? quiz.questions[i] : null;
             %>
               <div class="question-builder" data-qblock="<%= i %>">
-                <h4>Question <%= i + 1 %></h4>
+                <h4>السؤال <%= i + 1 %></h4>
 
                 <div class="form-group">
-                  <label class="form-label" for="q<%= i %>-text">Question text <span aria-hidden="true" class="text-danger">*</span></label>
+                  <label class="form-label" for="q<%= i %>-text">نص السؤال <span aria-hidden="true" class="text-danger">*</span></label>
                   <input
                     class="form-control"
                     type="text"
@@ -49,7 +49,7 @@
                 <div class="options-grid">
                   <% for (let j = 0; j < 4; j++) { %>
                     <div class="form-group">
-                      <label class="form-label" for="q<%= i %>-opt<%= j %>">Option <%= ['A','B','C','D'][j] %></label>
+                      <label class="form-label" for="q<%= i %>-opt<%= j %>">الخيار <%= ['أ','ب','ج','د'][j] %></label>
                       <input
                         class="form-control"
                         type="text"
@@ -64,7 +64,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label" for="q<%= i %>-correct">Correct answer</label>
+                  <label class="form-label" for="q<%= i %>-correct">الإجابة الصحيحة</label>
                   <select
                     class="form-control"
                     id="q<%= i %>-correct"
@@ -73,7 +73,7 @@
                     style="max-width:220px"
                   >
                     <% for (let j = 0; j < 4; j++) { %>
-                      <option value="<%= j %>" <%= q && q.correctOption === j ? 'selected' : '' %>>Option <%= ['A','B','C','D'][j] %></option>
+                      <option value="<%= j %>" <%= q && q.correctOption === j ? 'selected' : '' %>>الخيار <%= ['أ','ب','ج','د'][j] %></option>
                     <% } %>
                   </select>
                 </div>
@@ -81,8 +81,8 @@
             <% } %>
 
             <div class="d-flex gap-2 flex-wrap mt-3">
-              <button type="submit" class="btn btn-primary"><%= quiz ? 'Save Quiz' : 'Create Quiz' %></button>
-              <a href="/teacher/courses/<%= courseId %>" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary"><%= quiz ? 'حفظ الاختبار' : 'إنشاء الاختبار' %></button>
+              <a href="/teacher/courses/<%= courseId %>" class="btn btn-secondary">إلغاء</a>
             </div>
           </form>
         </div>

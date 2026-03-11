@@ -22,7 +22,7 @@
   --radius:        8px;
   --shadow:        0 2px 8px rgba(0,0,0,0.10);
   --shadow-md:     0 4px 16px rgba(0,0,0,0.14);
-  --font-base:     'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-base:     'Tajawal', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-mono:     'Consolas', monospace;
 }
 
@@ -45,7 +45,7 @@ body {
 .skip-link {
   position: absolute;
   top: -9999px;
-  left: 1rem;
+  right: 1rem;
   background: var(--primary);
   color: #fff;
   padding: .5rem 1rem;
@@ -528,3 +528,16 @@ footer a { color: rgba(255,255,255,.9); }
   .options-grid { grid-template-columns: 1fr; }
   .page-header { flex-direction: column; }
 }
+
+/* ── RTL overrides (Arabic) ── */
+[dir="rtl"] .breadcrumb li + li::before { content: '/'; margin: 0 .35rem; }
+[dir="rtl"] .lesson-item { flex-direction: row-reverse; }
+[dir="rtl"] .lesson-item .lesson-info { text-align: right; }
+[dir="rtl"] .course-card-footer { flex-direction: row-reverse; justify-content: flex-end; }
+[dir="rtl"] .module-header { flex-direction: row-reverse; }
+[dir="rtl"] .stat-card { direction: rtl; }
+[dir="rtl"] .navbar .navbar-nav { flex-direction: row-reverse; }
+[dir="rtl"] .page-header { flex-direction: row-reverse; }
+[dir="rtl"] .d-flex.gap-2 { flex-direction: row-reverse; }
+[dir="rtl"] .progress-bar-fill { transform-origin: right center; margin-right: 0; }
+[dir="rtl"] input[type="number"] { direction: ltr; text-align: left; }
