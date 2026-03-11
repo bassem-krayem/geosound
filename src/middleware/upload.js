@@ -28,7 +28,15 @@ if (isCloudStorageEnabled()) {  // ── Linode Object Storage (S3-compatible) 
   storage = multerS3({
     s3: createS3Client(),
     bucket,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
+    // Do NOT set acl at all — Linode Object Storage does not support the
+    // x-amz-acl header in newer regions (de-fra-1, etc.).  multer-s3 defaults
+    // to 'private' when acl is omitted, which still sends the header.
+    // Returning undefined from the callback tells the SDK to omit the param.
+    acl: (_req, _file, cb) => cb(null, undefined),
+    // Use the multer-validated mimetype directly instead of AUTO_CONTENT_TYPE.
+    // AUTO_CONTENT_TYPE reads the first stream chunk to detect the type, which
+    // can race with multer v2's stream handling and cause uploads to hang.
+    contentType: (_req, file, cb) => cb(null, file.mimetype),
     key: (_req, file, cb) => {
       const ext = path.extname(file.originalname);
       cb(null, `audio/audio-${Date.now()}${ext}`);
@@ -71,7 +79,13 @@ const upload = multer({
  */
 const uploadSingle = (req, res, next) => {
   upload.single('audio')(req, res, (err) => {
-    if (!err) return next();
+    if (!err) {
+      if (req.file && req.file.location) {
+        const masked = ((process.env.LINODE_STORAGE_ACCESS_KEY || '').trim().slice(0, 4) || '(empty)') + '…';
+        console.log(`[upload] Audio upload OK — location: ${req.file.location}  key: ${req.file.key}  access key: ${masked}`);
+      }
+      return next();
+    }
     // Log the real error server-side with diagnostic context
     const cluster = (process.env.LINODE_STORAGE_CLUSTER || '').trim();
     const key     = (process.env.LINODE_STORAGE_ACCESS_KEY || '').trim();
@@ -79,6 +93,7 @@ const uploadSingle = (req, res, next) => {
     console.error(`[upload] Audio upload failed — endpoint: https://${cluster}.linodeobjects.com  key: ${masked}`);
     console.error(`[upload] Error code: ${err.name || err.Code || err.$metadata?.httpStatusCode}`);
     console.error(`[upload] Error message: ${err.message}`);
+    if (err.cause) console.error(`[upload] Error cause: ${err.cause?.message || err.cause}`);
     // Forward to Express error handler with a user-friendly message
     const friendly = new Error('Audio file upload failed. Please try again.');
     friendly.statusCode = 500;
