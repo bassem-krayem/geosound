@@ -11,7 +11,6 @@ const CLOUD_STORAGE_ENABLED = !!(
   process.env.LINODE_STORAGE_ACCESS_KEY &&
   process.env.LINODE_STORAGE_SECRET_KEY &&
   process.env.LINODE_STORAGE_CLUSTER &&
-  process.env.LINODE_STORAGE_REGION &&
   process.env.LINODE_STORAGE_BUCKET
 );
 
