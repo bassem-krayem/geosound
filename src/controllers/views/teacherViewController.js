@@ -2,7 +2,7 @@ const Course = require('../../models/Course');
 const Module = require('../../models/Module');
 const Lesson = require('../../models/Lesson');
 const Quiz = require('../../models/Quiz');
-const { deleteAudio, getAudioUrl } = require('../../utils/deleteAudio');
+const { deleteAudio, getAudioUrl, generateSignedUrl } = require('../../utils/deleteAudio');
 
 // Normalise a value that may be a plain object with numeric string keys (produced by the
 // `qs` parser when using `extended:true`) or already a real array.
@@ -227,9 +227,12 @@ exports.showEditLesson = async (req, res) => {
   const lesson = await Lesson.findOne({ _id: req.params.lessonId, module: req.params.moduleId });
   if (!lesson) return res.redirect(`/teacher/courses/${course._id}`);
 
+  const lessonData = lesson.toObject();
+  lessonData.audioUrl = await generateSignedUrl(lessonData.audioUrl);
+
   res.render('teacher/lesson-form', {
     title: 'Edit Lesson', user: req.user, isEdit: true,
-    courseId: course._id, courseTitle: course.title, moduleId: req.params.moduleId, lesson,
+    courseId: course._id, courseTitle: course.title, moduleId: req.params.moduleId, lesson: lessonData,
   });
 };
 

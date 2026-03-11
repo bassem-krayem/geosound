@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
-const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { createS3Client } = require('../config/storage');
 
 /**
@@ -71,4 +72,33 @@ const deleteAudio = async (audioUrl) => {
   }
 };
 
-module.exports = { deleteAudio, isCloudStorageEnabled, getAudioUrl };
+/**
+ * Generates a pre-signed URL for temporary public access to a private cloud object.
+ * For local storage the stored URL is returned unchanged.
+ *
+ * Linode Object Storage does not support object-level ACLs in all regions, so
+ * objects are uploaded as private. Pre-signed URLs allow the browser to play
+ * audio without making the bucket publicly accessible.
+ *
+ * @param {string} audioUrl - The stored audioUrl value from the database.
+ * @param {number} [expiresIn=86400] - Expiry in seconds (default: 24 h).
+ * @returns {Promise<string|null>}
+ */
+const generateSignedUrl = async (audioUrl, expiresIn = 86400) => {
+  if (!audioUrl) return null;
+  if (!CLOUD_STORAGE_ENABLED) return audioUrl;
+
+  try {
+    // Virtual-hosted URL: https://<bucket>.<cluster>.linodeobjects.com/<key>
+    const url = new URL(audioUrl);
+    const key = url.pathname.replace(/^\//, '');
+    const bucket = (process.env.LINODE_STORAGE_BUCKET || '').trim();
+    const s3 = createS3Client();
+    return await getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
+  } catch (err) {
+    console.error('[generateSignedUrl] Failed to generate signed URL:', err.message);
+    return audioUrl; // fall back to original URL on error
+  }
+};
+
+module.exports = { deleteAudio, isCloudStorageEnabled, getAudioUrl, generateSignedUrl };
