@@ -28,7 +28,6 @@ if (isCloudStorageEnabled()) {  // ── Linode Object Storage (S3-compatible) 
   storage = multerS3({
     s3: createS3Client(),
     bucket,
-    acl: 'public-read',
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (_req, file, cb) => {
       const ext = path.extname(file.originalname);
