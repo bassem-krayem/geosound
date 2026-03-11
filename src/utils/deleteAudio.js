@@ -34,8 +34,18 @@ const getAudioUrl = (file) => {
 };
 
 /**
- * Deletes an audio file from Linode Object Storage or from the local filesystem,
- * depending on whether cloud storage is configured.
+ * Returns true when the stored audioUrl is a cloud (HTTPS) URL rather than a
+ * local relative path.  We detect this by URL shape, not by the current env-var
+ * state, so that old lessons whose audio was stored locally can still be handled
+ * correctly even after cloud storage is enabled.
+ */
+const isCloudUrl = (audioUrl) => typeof audioUrl === 'string' && audioUrl.startsWith('http');
+
+/**
+ * Deletes an audio file from Linode Object Storage or from the local filesystem.
+ * The decision is based on the shape of the stored audioUrl, not on whether cloud
+ * storage is currently configured, so that legacy local-path URLs are handled
+ * correctly even when cloud storage is now enabled.
  *
  * @param {string} audioUrl - The stored audioUrl value from the database.
  *   • Cloud: a full HTTPS URL  (https://bucket.cluster.linodeobjects.com/key)
@@ -44,7 +54,7 @@ const getAudioUrl = (file) => {
 const deleteAudio = async (audioUrl) => {
   if (!audioUrl) return;
 
-  if (CLOUD_STORAGE_ENABLED) {
+  if (isCloudUrl(audioUrl)) {
     try {
       // Extract the object key from the full URL.
       // URL format: https://<bucket>.<cluster>.linodeobjects.com/<key>
@@ -74,11 +84,12 @@ const deleteAudio = async (audioUrl) => {
 
 /**
  * Generates a pre-signed URL for temporary public access to a private cloud object.
- * For local storage the stored URL is returned unchanged.
+ * Returns the audioUrl unchanged for local paths (relative URLs starting with '/').
  *
- * Linode Object Storage does not support object-level ACLs in all regions, so
- * objects are uploaded as private. Pre-signed URLs allow the browser to play
- * audio without making the bucket publicly accessible.
+ * The decision is based on the shape of the stored audioUrl, not on whether cloud
+ * storage is currently configured.  This means lessons whose audio was stored as a
+ * local file path (uploaded before cloud storage was enabled) continue to work
+ * correctly even when cloud storage is now active.
  *
  * @param {string} audioUrl - The stored audioUrl value from the database.
  * @param {number} [expiresIn=86400] - Expiry in seconds (default: 24 h).
@@ -86,7 +97,9 @@ const deleteAudio = async (audioUrl) => {
  */
 const generateSignedUrl = async (audioUrl, expiresIn = 86400) => {
   if (!audioUrl) return null;
-  if (!CLOUD_STORAGE_ENABLED) return audioUrl;
+
+  // Local paths are served directly — no signing needed.
+  if (!isCloudUrl(audioUrl)) return audioUrl;
 
   try {
     // Virtual-hosted URL: https://<bucket>.<cluster>.linodeobjects.com/<key>
