@@ -4,14 +4,15 @@ const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { createS3Client } = require('../config/storage');
 
 /**
- * True when all required Linode Object Storage environment variables are present.
+ * True when all required Linode Object Storage environment variables are present
+ * (trimming each value so accidental whitespace doesn't silently disable cloud storage).
  * Evaluated once at module load time since env vars don't change during runtime.
  */
 const CLOUD_STORAGE_ENABLED = !!(
-  process.env.LINODE_STORAGE_ACCESS_KEY &&
-  process.env.LINODE_STORAGE_SECRET_KEY &&
-  process.env.LINODE_STORAGE_CLUSTER &&
-  process.env.LINODE_STORAGE_BUCKET
+  (process.env.LINODE_STORAGE_ACCESS_KEY || '').trim() &&
+  (process.env.LINODE_STORAGE_SECRET_KEY || '').trim() &&
+  (process.env.LINODE_STORAGE_CLUSTER || '').trim() &&
+  (process.env.LINODE_STORAGE_BUCKET || '').trim()
 );
 
 const isCloudStorageEnabled = () => CLOUD_STORAGE_ENABLED;
@@ -52,7 +53,7 @@ const deleteAudio = async (audioUrl) => {
       const s3 = createS3Client();
       await s3.send(
         new DeleteObjectCommand({
-          Bucket: process.env.LINODE_STORAGE_BUCKET,
+          Bucket: (process.env.LINODE_STORAGE_BUCKET || '').trim(),
           Key: key,
         })
       );

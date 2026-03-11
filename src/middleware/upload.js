@@ -17,9 +17,12 @@ const fileFilter = (_req, file, cb) => {
 let storage;
 
 if (isCloudStorageEnabled()) {  // ── Linode Object Storage (S3-compatible) ────────────────────────────────────
+  const cluster = (process.env.LINODE_STORAGE_CLUSTER || '').trim();
+  const bucket = (process.env.LINODE_STORAGE_BUCKET || '').trim();
+  console.log(`[upload] Cloud storage enabled — endpoint: https://${cluster}.linodeobjects.com  bucket: ${bucket}`);
   storage = multerS3({
     s3: createS3Client(),
-    bucket: process.env.LINODE_STORAGE_BUCKET,
+    bucket,
     acl: 'public-read',
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (_req, file, cb) => {
