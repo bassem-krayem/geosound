@@ -2,8 +2,7 @@ const Course = require('../../models/Course');
 const Module = require('../../models/Module');
 const Lesson = require('../../models/Lesson');
 const Quiz = require('../../models/Quiz');
-const path = require('path');
-const fs = require('fs');
+const { deleteAudio, getAudioUrl } = require('../../utils/deleteAudio');
 
 // Normalise a value that may be a plain object with numeric string keys (produced by the
 // `qs` parser when using `extended:true`) or already a real array.
@@ -106,10 +105,7 @@ exports.handleDeleteCourse = async (req, res) => {
   // Clean up audio files
   const lessons = await Lesson.find({ module: { $in: moduleIds } });
   for (const lesson of lessons) {
-    if (lesson.audioUrl) {
-      const p = path.join(process.cwd(), lesson.audioUrl);
-      if (fs.existsSync(p)) fs.unlinkSync(p);
-    }
+    if (lesson.audioUrl) await deleteAudio(lesson.audioUrl);
   }
 
   await Lesson.deleteMany({ module: { $in: moduleIds } });
@@ -177,10 +173,7 @@ exports.handleDeleteModule = async (req, res) => {
   if (module) {
     const lessons = await Lesson.find({ module: module._id });
     for (const lesson of lessons) {
-      if (lesson.audioUrl) {
-        const p = path.join(process.cwd(), lesson.audioUrl);
-        if (fs.existsSync(p)) fs.unlinkSync(p);
-      }
+      if (lesson.audioUrl) await deleteAudio(lesson.audioUrl);
     }
     await Lesson.deleteMany({ module: module._id });
   }
@@ -203,13 +196,19 @@ exports.showNewLesson = async (req, res) => {
 
 exports.handleNewLesson = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
-  if (!course) { if (req.file) fs.unlinkSync(req.file.path); return res.redirect('/teacher/dashboard'); }
+  if (!course) {
+    if (req.file) await deleteAudio(getAudioUrl(req.file));
+    return res.redirect('/teacher/dashboard');
+  }
   const module = await Module.findOne({ _id: req.params.moduleId, course: course._id });
-  if (!module) { if (req.file) fs.unlinkSync(req.file.path); return res.redirect(`/teacher/courses/${course._id}`); }
+  if (!module) {
+    if (req.file) await deleteAudio(getAudioUrl(req.file));
+    return res.redirect(`/teacher/courses/${course._id}`);
+  }
 
   const { title, description, order } = req.body;
   if (!title || !title.trim()) {
-    if (req.file) fs.unlinkSync(req.file.path);
+    if (req.file) await deleteAudio(getAudioUrl(req.file));
     return res.render('teacher/lesson-form', {
       title: 'New Lesson', user: req.user, isEdit: false,
       courseId: course._id, courseTitle: course.title, moduleId: module._id,
@@ -217,7 +216,7 @@ exports.handleNewLesson = async (req, res) => {
     });
   }
 
-  const audioUrl = req.file ? `/uploads/audio/${req.file.filename}` : null;
+  const audioUrl = getAudioUrl(req.file);
   await Lesson.create({ title: title.trim(), description, order: parseInt(order, 10) || 0, audioUrl, module: module._id });
   res.redirect(`/teacher/courses/${course._id}`);
 };
@@ -236,20 +235,23 @@ exports.showEditLesson = async (req, res) => {
 
 exports.handleEditLesson = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
-  if (!course) { if (req.file) fs.unlinkSync(req.file.path); return res.redirect('/teacher/dashboard'); }
+  if (!course) {
+    if (req.file) await deleteAudio(getAudioUrl(req.file));
+    return res.redirect('/teacher/dashboard');
+  }
 
   const lesson = await Lesson.findOne({ _id: req.params.lessonId, module: req.params.moduleId });
-  if (!lesson) { if (req.file) fs.unlinkSync(req.file.path); return res.redirect(`/teacher/courses/${course._id}`); }
+  if (!lesson) {
+    if (req.file) await deleteAudio(getAudioUrl(req.file));
+    return res.redirect(`/teacher/courses/${course._id}`);
+  }
 
   const { title, description, order } = req.body;
   const updateData = { title: (title || '').trim(), description, order: parseInt(order, 10) || 0 };
 
   if (req.file) {
-    if (lesson.audioUrl) {
-      const oldPath = path.join(process.cwd(), lesson.audioUrl);
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    }
-    updateData.audioUrl = `/uploads/audio/${req.file.filename}`;
+    if (lesson.audioUrl) await deleteAudio(lesson.audioUrl);
+    updateData.audioUrl = getAudioUrl(req.file);
   }
 
   await Lesson.findByIdAndUpdate(lesson._id, updateData);
@@ -261,10 +263,7 @@ exports.handleDeleteLesson = async (req, res) => {
   if (!course) return res.redirect('/teacher/dashboard');
 
   const lesson = await Lesson.findOneAndDelete({ _id: req.params.lessonId, module: req.params.moduleId });
-  if (lesson && lesson.audioUrl) {
-    const p = path.join(process.cwd(), lesson.audioUrl);
-    if (fs.existsSync(p)) fs.unlinkSync(p);
-  }
+  if (lesson && lesson.audioUrl) await deleteAudio(lesson.audioUrl);
   if (lesson) await Quiz.findOneAndDelete({ lesson: lesson._id });
 
   res.redirect(`/teacher/courses/${course._id}`);
