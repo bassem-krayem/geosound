@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
-const { createS3Client, validateLinodeStorage } = require('../config/storage');
+const { createS3Client, validateS3Storage } = require('../config/storage');
 const { isCloudStorageEnabled } = require('../utils/deleteAudio');
 
 const fileFilter = (_req, file, cb) => {
@@ -16,23 +16,18 @@ const fileFilter = (_req, file, cb) => {
 
 let storage;
 
-if (isCloudStorageEnabled()) {  // ── Linode Object Storage (S3-compatible) ────────────────────────────────────
-  const cluster = (process.env.LINODE_STORAGE_CLUSTER || '').trim();
-  const bucket = (process.env.LINODE_STORAGE_BUCKET || '').trim();
-  console.log(`[upload] Cloud storage enabled — endpoint: https://${cluster}.linodeobjects.com  bucket: ${bucket}`);
+if (isCloudStorageEnabled()) {  // ── Amazon S3 ─────────────────────────────────────────────────────────────────
+  const region = (process.env.AWS_S3_REGION || '').trim();
+  const bucket = (process.env.AWS_S3_BUCKET || '').trim();
+  console.log(`[upload] Cloud storage enabled — region: ${region}  bucket: ${bucket}`);
 
-  // validateLinodeStorage logs its own errors; suppress the unhandled-rejection
+  // validateS3Storage logs its own errors; suppress the unhandled-rejection
   // warning since we intentionally do not want to block server startup.
-  validateLinodeStorage().catch(() => {});
+  validateS3Storage().catch(() => {});
 
   storage = multerS3({
     s3: createS3Client(),
     bucket,
-    // Do NOT set acl at all — Linode Object Storage does not support the
-    // x-amz-acl header in newer regions (de-fra-1, etc.).  multer-s3 defaults
-    // to 'private' when acl is omitted, which still sends the header.
-    // Returning undefined from the callback tells the SDK to omit the param.
-    acl: (_req, _file, cb) => cb(null, undefined),
     // Use the multer-validated mimetype directly instead of AUTO_CONTENT_TYPE.
     // AUTO_CONTENT_TYPE reads the first stream chunk to detect the type, which
     // can race with multer v2's stream handling and cause uploads to hang.
@@ -70,7 +65,7 @@ const upload = multer({
 });
 
 /**
- * Wraps multer's upload.single() so that S3/Linode errors are logged with full
+ * Wraps multer's upload.single() so that S3 errors are logged with full
  * detail on the server and surfaced to Express as a clean 500 error instead of
  * the raw AWS XML message.
  *
@@ -81,16 +76,16 @@ const uploadSingle = (req, res, next) => {
   upload.single('audio')(req, res, (err) => {
     if (!err) {
       if (req.file && req.file.location) {
-        const masked = ((process.env.LINODE_STORAGE_ACCESS_KEY || '').trim().slice(0, 4) || '(empty)') + '…';
+        const masked = ((process.env.AWS_S3_ACCESS_KEY || '').trim().slice(0, 4) || '(empty)') + '…';
         console.log(`[upload] Audio upload OK — location: ${req.file.location}  key: ${req.file.key}  access key: ${masked}`);
       }
       return next();
     }
     // Log the real error server-side with diagnostic context
-    const cluster = (process.env.LINODE_STORAGE_CLUSTER || '').trim();
-    const key     = (process.env.LINODE_STORAGE_ACCESS_KEY || '').trim();
+    const region  = (process.env.AWS_S3_REGION || '').trim();
+    const key     = (process.env.AWS_S3_ACCESS_KEY || '').trim();
     const masked  = key.length > 4 ? `${key.slice(0, 4)}…` : '(empty)';
-    console.error(`[upload] Audio upload failed — endpoint: https://${cluster}.linodeobjects.com  key: ${masked}`);
+    console.error(`[upload] Audio upload failed — region: ${region}  access key: ${masked}`);
     console.error(`[upload] Error code: ${err.name || err.Code || err.$metadata?.httpStatusCode}`);
     console.error(`[upload] Error message: ${err.message}`);
     if (err.cause) console.error(`[upload] Error cause: ${err.cause?.message || err.cause}`);
