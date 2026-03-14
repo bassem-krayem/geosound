@@ -3,6 +3,7 @@ const Module = require('../../models/Module');
 const Lesson = require('../../models/Lesson');
 const Quiz = require('../../models/Quiz');
 const Progress = require('../../models/Progress');
+const { generateSignedUrl } = require('../../utils/deleteAudio');
 
 // ── All courses (public) ──────────────────────────────────────────────────────
 
@@ -148,7 +149,7 @@ exports.showLesson = async (req, res) => {
   res.render('student/lesson', {
     title: lesson.title,
     user: req.user || null,
-    lesson,
+    lesson: { ...lesson, audioUrl: await generateSignedUrl(lesson.audioUrl) },
     quiz,
     courseId,
     courseTitle: course.title,
