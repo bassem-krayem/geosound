@@ -9,7 +9,7 @@
         <h1>لوحة تعلّمي</h1>
         <p class="text-muted">مرحباً بعودتك، <strong><%= user.name %></strong>!</p>
       </div>
-      <a href="/courses" class="btn btn-primary">استعرض المزيد من الدورات</a>
+      <a href="/levels" class="btn btn-primary">استعرض المزيد من المستويات</a>
     </div>
 
     <%- include('../partials/flash') %>
@@ -18,7 +18,7 @@
     <div class="stat-cards mb-4" aria-label="إحصاءات التعلم">
       <div class="stat-card">
         <div class="stat-number"><%= enrollments.length %></div>
-        <div class="stat-label">الدورات المسجّلة</div>
+        <div class="stat-label">المستويات المسجّلة</div>
       </div>
       <div class="stat-card">
         <div class="stat-number"><%= totalCompleted %></div>
@@ -26,18 +26,18 @@
       </div>
     </div>
 
-    <!-- الدورات المسجّلة -->
-    <h2 class="mb-3">دوراتي</h2>
+    <!-- المستويات المسجّلة -->
+    <h2 class="mb-3">مستوياتي</h2>
     <% if (enrollments.length === 0) { %>
       <div class="alert alert-info">
-        لم تسجّل في أي دورة بعد. <a href="/courses">استعرض الدورات</a> للبدء!
+        لم تسجّل في أي مستوى بعد. <a href="/levels">استعرض المستويات</a> للبدء!
       </div>
     <% } else { %>
       <div class="grid grid-2">
         <% enrollments.forEach(enr => { %>
           <article class="course-card">
             <div class="course-card-body">
-              <h3><%= enr.course ? enr.course.title : 'الدورة غير متاحة' %></h3>
+              <h3><%= enr.course ? enr.course.title : 'المستوى غير متاح' %></h3>
               <p><%= enr.course && enr.course.description ? enr.course.description : '' %></p>
 
               <!-- شريط التقدم -->
@@ -63,7 +63,7 @@
               </div>
             </div>
             <div class="course-card-footer">
-              <a href="/courses/<%= enr.course ? enr.course._id : '' %>" class="btn btn-primary btn-sm">
+              <a href="/levels/<%= enr.course ? enr.course._id : '' %>" class="btn btn-primary btn-sm">
                 <%= completed > 0 ? 'متابعة التعلم' : 'بدء التعلم' %>
               </a>
             </div>

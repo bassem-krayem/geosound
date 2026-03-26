@@ -31,7 +31,7 @@ router
 
 router.post(
   '/submit',
-  restrictTo('student'),
+  restrictTo('pupil'),
   [
     body('answers')
       .isArray({ min: 5, max: 5 })

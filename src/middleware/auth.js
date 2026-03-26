@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { expandRole } = require('../utils/roles');
 
 exports.protect = async (req, res, next) => {
   let token;
@@ -33,7 +34,8 @@ exports.protect = async (req, res, next) => {
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    const allowedRoles = roles.flatMap((r) => expandRole(r));
+    if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         status: 'fail',
         message: 'You do not have permission to perform this action.',

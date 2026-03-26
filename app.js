@@ -76,6 +76,10 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/courses/:courseId/modules', moduleRoutes);
 app.use('/api/courses/:courseId/modules/:moduleId/lessons', lessonRoutes);
 app.use('/api/courses/:courseId/modules/:moduleId/lessons/:lessonId/quiz', quizRoutes);
+app.use('/api/levels', courseRoutes);
+app.use('/api/levels/:courseId/modules', moduleRoutes);
+app.use('/api/levels/:courseId/modules/:moduleId/lessons', lessonRoutes);
+app.use('/api/levels/:courseId/modules/:moduleId/lessons/:lessonId/quiz', quizRoutes);
 app.use('/api/progress', progressRoutes);
 
 // ── View (HTML) routes ────────────────────────────────────────────────────────
@@ -89,7 +93,7 @@ app.get('/', (req, res) => {
   if (req.user) {
     return res.redirect(req.user.role === 'teacher' ? '/teacher/dashboard' : '/dashboard');
   }
-  res.render('index', { title: 'Home', user: null });
+  res.render('index', { title: 'الرئيسية', user: null });
 });
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
@@ -97,7 +101,7 @@ app.use((req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ status: 'fail', message: 'Route not found.' });
   }
-  res.status(404).render('error', { title: 'Not Found', statusCode: 404, message: 'Page not found.', user: req.user || null });
+  res.status(404).render('error', { title: 'غير موجود', statusCode: 404, message: 'الصفحة غير موجودة.', user: req.user || null });
 });
 
 // ── Global error handler ──────────────────────────────────────────────────────
@@ -107,14 +111,14 @@ app.use((err, req, res, _next) => {
     if (req.path.startsWith('/api/')) {
       return res.status(403).json({ status: 'fail', message: 'Invalid CSRF token.' });
     }
-    return res.status(403).render('error', { title: 'Forbidden', statusCode: 403, message: 'Invalid or missing CSRF token. Please go back and try again.', user: req.user || null });
+    return res.status(403).render('error', { title: 'ممنوع', statusCode: 403, message: 'رمز الحماية CSRF غير صالح أو مفقود. يرجى المحاولة مرة أخرى.', user: req.user || null });
   }
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   if (req.path.startsWith('/api/')) {
     return res.status(statusCode).json({ status: 'error', message });
   }
-  res.status(statusCode).render('error', { title: 'Error', statusCode, message, user: req.user || null });
+  res.status(statusCode).render('error', { title: 'خطأ', statusCode, message, user: req.user || null });
 });
 
 module.exports = app;

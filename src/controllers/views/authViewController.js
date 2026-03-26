@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../../models/User');
+const { normalizeRole } = require('../../utils/roles');
 
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -18,19 +19,19 @@ exports.registerValidation = [
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').isIn(['teacher', 'student']).withMessage('Role must be teacher or student'),
+  body('role').isIn(['teacher', 'pupil', 'student']).withMessage('Role must be teacher or pupil'),
 ];
 
 exports.showRegister = (req, res) => {
   if (req.user) return res.redirect(req.user.role === 'teacher' ? '/teacher/dashboard' : '/dashboard');
-  res.render('auth/register', { title: 'Register', user: null });
+  res.render('auth/register', { title: 'تسجيل حساب', user: null });
 };
 
 exports.handleRegister = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.render('auth/register', {
-      title: 'Register',
+      title: 'تسجيل حساب',
       user: null,
       flash: { error: errors.array()[0].msg },
       formData: req.body,
@@ -42,14 +43,14 @@ exports.handleRegister = async (req, res) => {
   const existing = await User.findOne({ email });
   if (existing) {
     return res.render('auth/register', {
-      title: 'Register',
+      title: 'تسجيل حساب',
       user: null,
       flash: { error: 'An account with this email already exists.' },
       formData: req.body,
     });
   }
 
-  const user = await User.create({ name, email, password, role });
+  const user = await User.create({ name, email, password, role: normalizeRole(role) });
   const token = signToken(user._id);
   res.cookie('gs_token', token, COOKIE_OPTS);
 
@@ -65,14 +66,14 @@ exports.loginValidation = [
 
 exports.showLogin = (req, res) => {
   if (req.user) return res.redirect(req.user.role === 'teacher' ? '/teacher/dashboard' : '/dashboard');
-  res.render('auth/login', { title: 'Log In', user: null });
+  res.render('auth/login', { title: 'تسجيل الدخول', user: null });
 };
 
 exports.handleLogin = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.render('auth/login', {
-      title: 'Log In',
+      title: 'تسجيل الدخول',
       user: null,
       flash: { error: errors.array()[0].msg },
       formData: req.body,
@@ -83,7 +84,7 @@ exports.handleLogin = async (req, res) => {
   const user = await User.findOne({ email }).select('+password');
   if (!user || !(await user.correctPassword(password))) {
     return res.render('auth/login', {
-      title: 'Log In',
+      title: 'تسجيل الدخول',
       user: null,
       flash: { error: 'Invalid email or password.' },
       formData: { email },

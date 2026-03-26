@@ -11,7 +11,7 @@ router.post(
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    body('role').isIn(['teacher', 'student']).withMessage('Role must be teacher or student'),
+    body('role').isIn(['teacher', 'pupil', 'student']).withMessage('Role must be teacher or pupil'),
   ],
   authController.register
 );

@@ -6,13 +6,13 @@ const router = express.Router();
 
 router.use(protect);
 
-// Student enrollment and progress
-router.get('/my-enrollments', restrictTo('student'), progressController.getMyEnrollments);
+// Pupil enrollment and progress
+router.get('/my-enrollments', restrictTo('pupil'), progressController.getMyEnrollments);
 
-router.post('/courses/:courseId/enroll', restrictTo('student'), progressController.enrollInCourse);
+router.post('/courses/:courseId/enroll', restrictTo('pupil'), progressController.enrollInCourse);
 
-router.get('/courses/:courseId', restrictTo('student'), progressController.getCourseProgress);
+router.get('/courses/:courseId', restrictTo('pupil'), progressController.getCourseProgress);
 
-router.get('/lessons/:lessonId/access', restrictTo('student'), progressController.checkLessonAccess);
+router.get('/lessons/:lessonId/access', restrictTo('pupil'), progressController.checkLessonAccess);
 
 module.exports = router;
