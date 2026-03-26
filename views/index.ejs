@@ -1,48 +1,94 @@
 <%- include('partials/head') %>
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<main id="main-content">
-  <!-- Hero -->
-  <section class="hero" aria-labelledby="hero-heading">
-    <div class="container">
-      <h1 id="hero-heading">تعلّم الجغرافيا من خلال الصوت</h1>
-      <p>منصة صوتية أولى مصمّمة للطلاب المكفوفين وضعاف البصر. استمع إلى الدروس، أجب على الاختبارات، وافتح معرفة جديدة خطوة بخطوة.</p>
-      <div>
-        <a href="/register" class="btn btn-accent btn-lg">ابدأ مجاناً</a>
-        <a href="/courses" class="btn btn-secondary btn-lg" style="margin-right:.75rem; border-color:rgba(255,255,255,.5); color:#fff;">استعرض الدورات</a>
-      </div>
-      <div class="hero-badges" aria-label="مميزات المنصة">
-        <span class="badge">🎧 دروس صوتية</span>
-        <span class="badge">📝 اختبارات تفاعلية</span>
-        <span class="badge">🔓 فتح قائم على التقدم</span>
-        <span class="badge">♿ إمكانية الوصول أولاً</span>
-      </div>
-    </div>
-  </section>
+    <main id="main-content">
+      <section class="hero" aria-labelledby="hero-heading">
+        <div class="container">
+          <h1 id="hero-heading">استكشف الجغرافيا بطريقة تفاعلية تعتمد على الصوت</h1>
+          <p>منصة تعليمية مبتكرة تمنحك تجربة تعلم ممتعة، عميقة، ومناسبة للجميع، وخاصة لذوي الإعاقة البصرية.</p>
+          <div>
+            <a href="/register" class="btn btn-accent btn-lg">ابدأ رحلتك الآن</a>
+            <a href="/courses" class="btn btn-secondary btn-lg"
+              style="margin-right:.75rem; border-color:rgba(255,255,255,.5); color:#fff;">استكشف الدروس</a>
+          </div>
+        </div>
+      </section>
 
-  <!-- Features -->
-  <section class="features" aria-labelledby="features-heading">
-    <div class="container">
-      <h2 id="features-heading" class="text-center mb-4">كيف يعمل؟</h2>
-      <div class="grid grid-3">
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">🎓</div>
-          <h3>سجّل وتعلّم</h3>
-          <p>تصفّح الدورات التي أنشأها معلمو الجغرافيا الخبراء، سجّل خلال ثوانٍ، وابدأ بالدرس الصوتي الأول فوراً.</p>
-        </article>
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">🎧</div>
-          <h3>استمع بعناية</h3>
-          <p>كل درس يحتوي على تسجيل صوتي عالي الجودة. استخدم سماعات الأذن للحصول على أفضل تجربة. أعد التشغيل كما تشاء.</p>
-        </article>
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">✅</div>
-          <h3>اجتز لتتقدم</h3>
-          <p>بعد كل درس، أجب على 5 أسئلة. احصل على 70% على الأقل لفتح الدرس التالي. أعد المحاولة كما تشاء.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-</main>
+      <section class="about-section" aria-labelledby="about-heading" style="padding: 4rem 0; background: #f9f9f9;">
+        <div class="container">
+          <h2 id="about-heading" class="text-center mb-4">من نحن؟</h2>
+          <p class="text-center" style="max-width: 800px; margin: 0 auto; line-height: 1.8; font-size: 1.1rem;">
+            <strong>GeoSound</strong> هي منصة تعليمية رقمية تهدف إلى تبسيط مادة الجغرافيا وجعلها أكثر تفاعلاً وسهولة، من
+            خلال تقديم محتوى صوتي غني يساعد المتعلّم على الفهم العميق بدل الحفظ السطحي. تم تصميم هذه المنصة في إطار بحث
+            تخرّج، بهدف دعم التعليم الشامل وتمكين جميع الفئات، وخاصة المكفوفين، من الوصول إلى المعرفة بطريقة حديثة
+            وممتعة.
+          </p>
+        </div>
+      </section>
 
-<%- include('partials/footer') %>
+      <section class="features" aria-labelledby="features-heading">
+        <div class="container">
+          <h2 id="features-heading" class="text-center mb-4">ماذا تقدم GeoSound؟</h2>
+          <div class="grid grid-3">
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">✨</div>
+              <h3>دروس تفاعلية</h3>
+              <p>محتوى صوتي غني يغنيك عن الطرق التقليدية المملة.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">📊</div>
+              <h3>تقييم مستمر</h3>
+              <p>اختبارات تقييمية بعد كل درس لقياس مستوى فهمك.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">🚀</div>
+              <h3>نظام تقدم ذكي</h3>
+              <p>لا يمكنك الانتقال للدرس الموالي إلا بعد تحقيق 70% لضمان التعلّم المتين.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">💡</div>
+              <h3>محتوى مبسط</h3>
+              <p>شرح واضح وميسّر يناسب جميع المستويات الدراسية.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">♿</div>
+              <h3>إمكانية وصول كاملة</h3>
+              <p>تجربة تعليمية مهيأة بالكامل لتناسب ذوي الإعاقة البصرية.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">🤝</div>
+              <h3>تكافؤ الفرص</h3>
+              <p>نؤمن أن التعليم حق للجميع، لذلك نعتمد السمع كوسيلة رئيسية للفهم.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="how-it-works" aria-labelledby="how-heading" style="padding: 4rem 0; background: #fff;">
+        <div class="container">
+          <h2 id="how-heading" class="text-center mb-4">كيف تعمل المنصة؟</h2>
+          <div class="grid grid-4" style="text-align: center;">
+            <div class="step">
+              <div class="step-number" style="font-size: 2rem; font-weight: bold; color: var(--accent-color);">1</div>
+              <p>اختر الدرس الذي ترغب في تعلمه</p>
+            </div>
+            <div class="step">
+              <div class="step-number" style="font-size: 2rem; font-weight: bold; color: var(--accent-color);">2</div>
+              <p>استمع إلى المحتوى الصوتي وتفاعل معه</p>
+            </div>
+            <div class="step">
+              <div class="step-number" style="font-size: 2rem; font-weight: bold; color: var(--accent-color);">3</div>
+              <p>اجتز الاختبار الخاص بالدرس</p>
+            </div>
+            <div class="step">
+              <div class="step-number" style="font-size: 2rem; font-weight: bold; color: var(--accent-color);">4</div>
+              <p>حقق 70% للانتقال للدرس الموالي</p>
+            </div>
+          </div>
+          <p class="text-center mt-4" style="font-weight: bold;">🎯 بهذه الطريقة نضمن فهماً حقيقياً وتعلماً تدريجياً
+            متيناً</p>
+        </div>
+      </section>
+    </main>
+
+    <%- include('partials/footer') %>
