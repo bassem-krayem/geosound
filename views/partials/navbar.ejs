@@ -5,13 +5,13 @@
     </a>
     <ul class="navbar-nav" role="list">
       <% if (typeof user !== 'undefined' && user) { %>
-        <% if (user.role === 'student') { %>
-          <li><a href="/courses" class="<%= typeof activePage !== 'undefined' && activePage === 'courses' ? 'active' : '' %>">الدورات</a></li>
+        <% if (user.role === 'pupil' || user.role === 'student') { %>
+          <li><a href="/levels" class="<%= typeof activePage !== 'undefined' && activePage === 'levels' ? 'active' : '' %>">المستويات</a></li>
           <li><a href="/dashboard" class="<%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">تعلّمي</a></li>
         <% } %>
         <% if (user.role === 'teacher') { %>
           <li><a href="/teacher/dashboard" class="<%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">لوحة التحكم</a></li>
-          <li><a href="/teacher/courses" class="<%= typeof activePage !== 'undefined' && activePage === 'my-courses' ? 'active' : '' %>">دوراتي</a></li>
+          <li><a href="/teacher/levels" class="<%= typeof activePage !== 'undefined' && activePage === 'my-levels' ? 'active' : '' %>">مستوياتي</a></li>
         <% } %>
         <li>
           <form action="/logout" method="POST" style="margin:0">
@@ -19,9 +19,9 @@
             <button type="submit" class="btn btn-sm btn-nav" aria-label="تسجيل الخروج من جيوساوند">تسجيل الخروج</button>
           </form>
         </li>
-        <li><span class="tag <%= user.role === 'teacher' ? 'tag-teacher' : 'tag-student' %>"><%= user.name %></span></li>
+        <li><span class="tag <%= user.role === 'teacher' ? 'tag-teacher' : 'tag-pupil' %>"><%= user.name %></span></li>
       <% } else { %>
-        <li><a href="/courses">الدورات</a></li>
+        <li><a href="/levels">المستويات</a></li>
         <li><a href="/login">تسجيل الدخول</a></li>
         <li><a href="/register" class="btn btn-sm btn-nav">إنشاء حساب</a></li>
       <% } %>

@@ -10,31 +10,27 @@
       <!-- مسار التنقل -->
       <ol class="breadcrumb" aria-label="مسار التنقل">
         <li><a href="/teacher/dashboard">لوحة التحكم</a></li>
-        <li><%= isEdit ? 'تعديل الدورة' : 'دورة جديدة' %></li>
+        <li><%= isEdit ? 'تعديل المستوى' : 'مستوى جديد' %></li>
       </ol>
 
-      <h1 class="mb-3"><%= isEdit ? 'تعديل الدورة' : 'إنشاء دورة جديدة' %></h1>
+      <h1 class="mb-3"><%= isEdit ? 'تعديل المستوى' : 'إنشاء مستوى جديد' %></h1>
 
       <div class="card">
         <div class="card-body">
           <form
-            action="<%= isEdit ? '/teacher/courses/' + course._id + '/edit' : '/teacher/courses/new' %>"
+            action="<%= isEdit ? '/teacher/levels/' + course._id + '/edit' : '/teacher/levels/new' %>"
             method="POST"
             novalidate
-            aria-label="<%= isEdit ? 'نموذج تعديل الدورة' : 'نموذج إنشاء الدورة' %>"
+            aria-label="<%= isEdit ? 'نموذج تعديل المستوى' : 'نموذج إنشاء المستوى' %>"
           >
             <%- include('../partials/csrf') %>
             <div class="form-group">
-              <label class="form-label" for="title">عنوان الدورة <span aria-hidden="true" class="text-danger">*</span></label>
-              <input
-                class="form-control"
-                type="text"
-                id="title"
-                name="title"
-                required
-                aria-required="true"
-                value="<%= typeof course !== 'undefined' && course.title ? course.title : '' %>"
-              />
+              <label class="form-label" for="title">عنوان المستوى <span aria-hidden="true" class="text-danger">*</span></label>
+              <select class="form-control" id="title" name="title" required aria-required="true">
+                <option value="" disabled <%= typeof course === 'undefined' || !course.title ? 'selected' : '' %>>اختر المستوى</option>
+                <option value="السنة الخامسة من التعليم الأساسي" <%= typeof course !== 'undefined' && course.title === 'السنة الخامسة من التعليم الأساسي' ? 'selected' : '' %>>السنة الخامسة من التعليم الأساسي</option>
+                <option value="السنة السادسة من التعليم الأساسي" <%= typeof course !== 'undefined' && course.title === 'السنة السادسة من التعليم الأساسي' ? 'selected' : '' %>>السنة السادسة من التعليم الأساسي</option>
+              </select>
             </div>
 
             <div class="form-group">
@@ -43,16 +39,11 @@
                 class="form-control"
                 id="description"
                 name="description"
-                maxlength="500"
-                aria-describedby="desc-hint"
               ><%= typeof course !== 'undefined' && course.description ? course.description : '' %></textarea>
-              <span class="form-hint" id="desc-hint">
-                <span class="char-count"></span>
-              </span>
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
-              <button type="submit" class="btn btn-primary"><%= isEdit ? 'حفظ التغييرات' : 'إنشاء الدورة' %></button>
+              <button type="submit" class="btn btn-primary"><%= isEdit ? 'حفظ التغييرات' : 'إنشاء المستوى' %></button>
               <a href="/teacher/dashboard" class="btn btn-secondary">إلغاء</a>
             </div>
           </form>

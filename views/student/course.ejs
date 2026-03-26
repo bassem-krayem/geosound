@@ -8,7 +8,7 @@
 
     <!-- مسار التنقل -->
     <ol class="breadcrumb" aria-label="مسار التنقل">
-      <li><a href="/courses">الدورات</a></li>
+      <li><a href="/levels">المستويات</a></li>
       <li><%= course.title %></li>
     </ol>
 
@@ -23,9 +23,9 @@
         </p>
       </div>
       <% if (user && !enrolled) { %>
-        <form action="/courses/<%= course._id %>/enroll" method="POST">
+        <form action="/levels/<%= course._id %>/enroll" method="POST">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <button type="submit" class="btn btn-success">التسجيل في الدورة</button>
+          <button type="submit" class="btn btn-success">التسجيل في المستوى</button>
         </form>
       <% } else if (user && enrolled) { %>
         <span class="tag tag-unlocked" style="font-size:1rem;padding:.4rem 1rem">✓ مسجّل</span>
@@ -34,7 +34,7 @@
 
     <!-- شريط التقدم -->
     <% if (user && enrolled && progressData) { %>
-      <div class="card mb-3" aria-label="تقدّمك في الدورة">
+      <div class="card mb-3" aria-label="تقدّمك في المستوى">
         <div class="card-body">
           <div class="d-flex align-center gap-2 flex-wrap">
             <strong style="flex-shrink:0">تقدّمك:</strong>
@@ -59,7 +59,7 @@
 
     <!-- الوحدات والدروس -->
     <% if (!modules || modules.length === 0) { %>
-      <div class="alert alert-info">لا توجد وحدات في هذه الدورة بعد.</div>
+      <div class="alert alert-info">لا توجد وحدات في هذا المستوى بعد.</div>
     <% } else { %>
       <% modules.forEach((mod, mIdx) => { %>
         <div class="module-block">
@@ -108,7 +108,7 @@
                     </div>
                     <% if (isAccessible) { %>
                       <a
-                        href="/courses/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>"
+                        href="/levels/<%= course._id %>/modules/<%= mod._id %>/lessons/<%= lesson._id %>"
                         class="btn btn-sm <%= isCompleted ? 'btn-secondary' : 'btn-primary' %>"
                         aria-label="<%= isCompleted ? 'مراجعة' : 'ابدأ' %> الدرس: <%= lesson.title %>"
                       ><%= isCompleted ? 'مراجعة' : 'ابدأ' %></a>

@@ -4,46 +4,47 @@ const Lesson = require('../../models/Lesson');
 const Quiz = require('../../models/Quiz');
 const Progress = require('../../models/Progress');
 const { generateSignedUrl } = require('../../utils/deleteAudio');
+const { isLearnerRole } = require('../../utils/roles');
 
-// ── All courses (public) ──────────────────────────────────────────────────────
+// ── All levels (public) ───────────────────────────────────────────────────────
 
 exports.showCourses = async (req, res) => {
   const courses = await Course.find().populate('teacher', 'name');
 
   let enrolledIds = [];
-  if (req.user && req.user.role === 'student') {
+  if (req.user && isLearnerRole(req.user.role)) {
     const progresses = await Progress.find({ student: req.user._id }).select('course');
     enrolledIds = progresses.map((p) => p.course.toString());
   }
 
   res.render('student/courses', {
-    title: 'Courses',
-    activePage: 'courses',
+    title: 'المستويات',
+    activePage: 'levels',
     user: req.user || null,
     courses,
     enrolledIds,
   });
 };
 
-// ── Enroll in course ──────────────────────────────────────────────────────────
+// ── Enroll in level ───────────────────────────────────────────────────────────
 
 exports.enrollInCourse = async (req, res) => {
   const course = await Course.findById(req.params.courseId);
-  if (!course) return res.redirect('/courses');
+  if (!course) return res.redirect('/levels');
 
   const existing = await Progress.findOne({ student: req.user._id, course: course._id });
   if (!existing) {
     await Progress.create({ student: req.user._id, course: course._id, lessons: [] });
   }
 
-  res.redirect(`/courses/${course._id}`);
+  res.redirect(`/levels/${course._id}`);
 };
 
-// ── Course detail ─────────────────────────────────────────────────────────────
+// ── Level detail ──────────────────────────────────────────────────────────────
 
 exports.showCourse = async (req, res) => {
   const course = await Course.findById(req.params.courseId).populate('teacher', 'name');
-  if (!course) return res.status(404).render('error', { title: 'Not Found', statusCode: 404, message: 'Course not found.', user: req.user || null });
+  if (!course) return res.status(404).render('error', { title: 'غير موجود', statusCode: 404, message: 'المستوى غير موجود.', user: req.user || null });
 
   const modules = await Module.find({ course: course._id })
     .sort('order')
@@ -60,7 +61,7 @@ exports.showCourse = async (req, res) => {
   let enrolled = false;
   let progressData = null;
 
-  if (req.user && req.user.role === 'student') {
+  if (req.user && isLearnerRole(req.user.role)) {
     const progress = await Progress.findOne({ student: req.user._id, course: course._id })
       .populate('lessons.lesson', 'title order')
       .lean();
@@ -106,7 +107,7 @@ exports.showDashboard = async (req, res) => {
   const totalCompleted = enrollments.reduce((sum, e) => sum + e.lessons.filter((l) => l.completed).length, 0);
 
   res.render('student/dashboard', {
-    title: 'My Learning',
+    title: 'رحلتي التعليمية',
     activePage: 'dashboard',
     user: req.user,
     enrollments,
@@ -125,7 +126,7 @@ exports.showLesson = async (req, res) => {
   ]);
 
   if (!course || !lesson) {
-    return res.status(404).render('error', { title: 'Not Found', statusCode: 404, message: 'Lesson not found.', user: req.user || null });
+    return res.status(404).render('error', { title: 'غير موجود', statusCode: 404, message: 'الدرس غير موجود.', user: req.user || null });
   }
 
   // Fetch quiz (hide correctOption)

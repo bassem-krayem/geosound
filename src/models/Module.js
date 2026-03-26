@@ -13,7 +13,8 @@ const moduleSchema = new mongoose.Schema(
     },
     order: {
       type: Number,
-      default: 0,
+      min: 1,
+      default: 1,
     },
     course: {
       type: mongoose.Schema.Types.ObjectId,

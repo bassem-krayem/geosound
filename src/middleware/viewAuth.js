@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { expandRole } = require('../utils/roles');
 
 /**
  * Reads JWT from the gs_token cookie and attaches req.user.
@@ -36,7 +37,8 @@ exports.requireAuth = (req, res, next) => {
  */
 exports.requireRole = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    const allowedRoles = roles.flatMap((r) => expandRole(r));
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
       return res.redirect(req.user ? (req.user.role === 'teacher' ? '/teacher/dashboard' : '/dashboard') : '/login');
     }
     next();

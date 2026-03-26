@@ -17,7 +17,8 @@ const lessonSchema = new mongoose.Schema(
     },
     order: {
       type: Number,
-      default: 0,
+      min: 1,
+      default: 1,
     },
     module: {
       type: mongoose.Schema.Types.ObjectId,

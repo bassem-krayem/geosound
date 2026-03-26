@@ -9,7 +9,7 @@
         <h1>لوحة تحكم المعلم</h1>
         <p class="text-muted">مرحباً، <strong><%= user.name %></strong></p>
       </div>
-      <a href="/teacher/courses/new" class="btn btn-primary">+ دورة جديدة</a>
+      <a href="/teacher/levels/new" class="btn btn-primary">+ مستوى جديد</a>
     </div>
 
     <%- include('../partials/flash') %>
@@ -18,7 +18,7 @@
     <div class="stat-cards mb-4" aria-label="إحصاءات التدريس">
       <div class="stat-card">
         <div class="stat-number"><%= stats.courses %></div>
-        <div class="stat-label">الدورات</div>
+        <div class="stat-label">المستويات</div>
       </div>
       <div class="stat-card">
         <div class="stat-number"><%= stats.modules %></div>
@@ -34,11 +34,11 @@
       </div>
     </div>
 
-    <h2 class="mb-3">دوراتك</h2>
+    <h2 class="mb-3">مستوياتك</h2>
 
     <% if (courses.length === 0) { %>
       <div class="alert alert-info">
-        لم تنشئ أي دورات بعد. <a href="/teacher/courses/new">أنشئ أول دورة لك</a>!
+        لم تنشئ أي مستويات بعد. <a href="/teacher/levels/new">أنشئ أول مستوى لك</a>!
       </div>
     <% } else { %>
       <div class="grid grid-2">
@@ -49,14 +49,14 @@
               <p><%= course.description || 'لا يوجد وصف.' %></p>
             </div>
             <div class="course-card-footer">
-              <a href="/teacher/courses/<%= course._id %>" class="btn btn-primary btn-sm">إدارة</a>
-              <a href="/teacher/courses/<%= course._id %>/edit" class="btn btn-secondary btn-sm">تعديل</a>
-              <form action="/teacher/courses/<%= course._id %>/delete" method="POST" style="margin:0">
+              <a href="/teacher/levels/<%= course._id %>" class="btn btn-primary btn-sm">إدارة</a>
+              <a href="/teacher/levels/<%= course._id %>/edit" class="btn btn-secondary btn-sm">تعديل</a>
+              <form action="/teacher/levels/<%= course._id %>/delete" method="POST" style="margin:0">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                 <button
                   type="submit"
                   class="btn btn-danger btn-sm"
-                  data-confirm="حذف الدورة '<%= course.title %>' وكل محتواها؟ لا يمكن التراجع عن هذا."
+                  data-confirm="حذف المستوى '<%= course.title %>' وكل محتواه؟ لا يمكن التراجع عن هذا."
                 >حذف</button>
               </form>
             </div>

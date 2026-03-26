@@ -57,7 +57,7 @@
         <label class="form-label" for="role">أنا...</label>
         <select class="form-control" id="role" name="role" required aria-required="true">
           <option value="" disabled <%= typeof formData === 'undefined' || !formData.role ? 'selected' : '' %>>اختر دورك</option>
-          <option value="student" <%= typeof formData !== 'undefined' && formData.role === 'student' ? 'selected' : '' %>>طالب</option>
+          <option value="pupil" <%= typeof formData !== 'undefined' && (formData.role === 'pupil' || formData.role === 'student') ? 'selected' : '' %>>تلميذ</option>
           <option value="teacher" <%= typeof formData !== 'undefined' && formData.role === 'teacher' ? 'selected' : '' %>>معلم</option>
         </select>
       </div>

@@ -4,6 +4,11 @@ const Lesson = require('../../models/Lesson');
 const Quiz = require('../../models/Quiz');
 const { deleteAudio, getAudioUrl, generateSignedUrl } = require('../../utils/deleteAudio');
 
+const ALLOWED_LEVEL_TITLES = [
+  'السنة الخامسة من التعليم الأساسي',
+  'السنة السادسة من التعليم الأساسي',
+];
+
 // Normalise a value that may be a plain object with numeric string keys (produced by the
 // `qs` parser when using `extended:true`) or already a real array.
 const toArray = (val) => {
@@ -30,7 +35,7 @@ exports.showDashboard = async (req, res) => {
   const quizCount = await Quiz.countDocuments({ lesson: { $in: lessonIds } });
 
   res.render('teacher/dashboard', {
-    title: 'Teacher Dashboard',
+    title: 'لوحة تحكم المعلم',
     activePage: 'dashboard',
     user: req.user,
     courses,
@@ -46,19 +51,19 @@ exports.showDashboard = async (req, res) => {
 // ── Course management ─────────────────────────────────────────────────────────
 
 exports.showNewCourse = (req, res) => {
-  res.render('teacher/course-form', { title: 'New Course', user: req.user, isEdit: false });
+  res.render('teacher/course-form', { title: 'مستوى جديد', user: req.user, isEdit: false });
 };
 
 exports.handleNewCourse = async (req, res) => {
   const { title, description } = req.body;
-  if (!title || !title.trim()) {
+  if (!title || !title.trim() || !ALLOWED_LEVEL_TITLES.includes(title.trim())) {
     return res.render('teacher/course-form', {
-      title: 'New Course', user: req.user, isEdit: false,
-      flash: { error: 'Course title is required.' }, course: req.body,
+      title: 'مستوى جديد', user: req.user, isEdit: false,
+      flash: { error: 'يرجى اختيار مستوى صحيح من القائمة.' }, course: req.body,
     });
   }
   const course = await Course.create({ title: title.trim(), description, teacher: req.user._id });
-  res.redirect(`/teacher/courses/${course._id}`);
+  res.redirect(`/teacher/levels/${course._id}`);
 };
 
 exports.showCourse = async (req, res) => {
@@ -76,7 +81,7 @@ exports.showCourse = async (req, res) => {
 exports.showEditCourse = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
   if (!course) return res.redirect('/teacher/dashboard');
-  res.render('teacher/course-form', { title: 'Edit Course', user: req.user, isEdit: true, course });
+  res.render('teacher/course-form', { title: 'تعديل المستوى', user: req.user, isEdit: true, course });
 };
 
 exports.handleEditCourse = async (req, res) => {
@@ -84,15 +89,15 @@ exports.handleEditCourse = async (req, res) => {
   if (!course) return res.redirect('/teacher/dashboard');
 
   const { title, description } = req.body;
-  if (!title || !title.trim()) {
+  if (!title || !title.trim() || !ALLOWED_LEVEL_TITLES.includes(title.trim())) {
     return res.render('teacher/course-form', {
-      title: 'Edit Course', user: req.user, isEdit: true, course: { ...course.toObject(), ...req.body },
-      flash: { error: 'Course title is required.' },
+      title: 'تعديل المستوى', user: req.user, isEdit: true, course: { ...course.toObject(), ...req.body },
+      flash: { error: 'يرجى اختيار مستوى صحيح من القائمة.' },
     });
   }
 
   await Course.findByIdAndUpdate(course._id, { title: title.trim(), description });
-  res.redirect(`/teacher/courses/${course._id}`);
+  res.redirect(`/teacher/levels/${course._id}`);
 };
 
 exports.handleDeleteCourse = async (req, res) => {
@@ -121,7 +126,7 @@ exports.showNewModule = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
   if (!course) return res.redirect('/teacher/dashboard');
   res.render('teacher/module-form', {
-    title: 'New Module', user: req.user, isEdit: false,
+    title: 'وحدة جديدة', user: req.user, isEdit: false,
     courseId: course._id, courseTitle: course.title,
   });
 };
@@ -133,24 +138,24 @@ exports.handleNewModule = async (req, res) => {
   const { title, description, order } = req.body;
   if (!title || !title.trim()) {
     return res.render('teacher/module-form', {
-      title: 'New Module', user: req.user, isEdit: false,
+      title: 'وحدة جديدة', user: req.user, isEdit: false,
       courseId: course._id, courseTitle: course.title,
-      flash: { error: 'Module title is required.' }, module: req.body,
+      flash: { error: 'عنوان الوحدة مطلوب.' }, module: req.body,
     });
   }
 
-  await Module.create({ title: title.trim(), description, order: parseInt(order, 10) || 0, course: course._id });
-  res.redirect(`/teacher/courses/${course._id}`);
+  await Module.create({ title: title.trim(), description, order: Math.max(1, parseInt(order, 10) || 1), course: course._id });
+  res.redirect(`/teacher/levels/${course._id}`);
 };
 
 exports.showEditModule = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
   if (!course) return res.redirect('/teacher/dashboard');
   const module = await Module.findOne({ _id: req.params.moduleId, course: course._id });
-  if (!module) return res.redirect(`/teacher/courses/${course._id}`);
+  if (!module) return res.redirect(`/teacher/levels/${course._id}`);
 
   res.render('teacher/module-form', {
-    title: 'Edit Module', user: req.user, isEdit: true,
+    title: 'تعديل الوحدة', user: req.user, isEdit: true,
     courseId: course._id, courseTitle: course.title, module,
   });
 };
@@ -159,11 +164,11 @@ exports.handleEditModule = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
   if (!course) return res.redirect('/teacher/dashboard');
   const module = await Module.findOne({ _id: req.params.moduleId, course: course._id });
-  if (!module) return res.redirect(`/teacher/courses/${course._id}`);
+  if (!module) return res.redirect(`/teacher/levels/${course._id}`);
 
   const { title, description, order } = req.body;
-  await Module.findByIdAndUpdate(module._id, { title: title.trim(), description, order: parseInt(order, 10) || 0 });
-  res.redirect(`/teacher/courses/${course._id}`);
+  await Module.findByIdAndUpdate(module._id, { title: title.trim(), description, order: Math.max(1, parseInt(order, 10) || 1) });
+  res.redirect(`/teacher/levels/${course._id}`);
 };
 
 exports.handleDeleteModule = async (req, res) => {
@@ -177,7 +182,7 @@ exports.handleDeleteModule = async (req, res) => {
     }
     await Lesson.deleteMany({ module: module._id });
   }
-  res.redirect(`/teacher/courses/${course._id}`);
+  res.redirect(`/teacher/levels/${course._id}`);
 };
 
 // ── Lesson management ─────────────────────────────────────────────────────────
@@ -186,10 +191,10 @@ exports.showNewLesson = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
   if (!course) return res.redirect('/teacher/dashboard');
   const module = await Module.findOne({ _id: req.params.moduleId, course: course._id });
-  if (!module) return res.redirect(`/teacher/courses/${course._id}`);
+  if (!module) return res.redirect(`/teacher/levels/${course._id}`);
 
   res.render('teacher/lesson-form', {
-    title: 'New Lesson', user: req.user, isEdit: false,
+    title: 'درس جديد', user: req.user, isEdit: false,
     courseId: course._id, courseTitle: course.title, moduleId: module._id,
   });
 };
@@ -203,35 +208,35 @@ exports.handleNewLesson = async (req, res) => {
   const module = await Module.findOne({ _id: req.params.moduleId, course: course._id });
   if (!module) {
     if (req.file) await deleteAudio(getAudioUrl(req.file));
-    return res.redirect(`/teacher/courses/${course._id}`);
+    return res.redirect(`/teacher/levels/${course._id}`);
   }
 
   const { title, description, order } = req.body;
   if (!title || !title.trim()) {
     if (req.file) await deleteAudio(getAudioUrl(req.file));
     return res.render('teacher/lesson-form', {
-      title: 'New Lesson', user: req.user, isEdit: false,
+      title: 'درس جديد', user: req.user, isEdit: false,
       courseId: course._id, courseTitle: course.title, moduleId: module._id,
-      flash: { error: 'Lesson title is required.' }, lesson: req.body,
+      flash: { error: 'عنوان الدرس مطلوب.' }, lesson: req.body,
     });
   }
 
   const audioUrl = getAudioUrl(req.file);
-  await Lesson.create({ title: title.trim(), description, order: parseInt(order, 10) || 0, audioUrl, module: module._id });
-  res.redirect(`/teacher/courses/${course._id}`);
+  await Lesson.create({ title: title.trim(), description, order: Math.max(1, parseInt(order, 10) || 1), audioUrl, module: module._id });
+  res.redirect(`/teacher/levels/${course._id}`);
 };
 
 exports.showEditLesson = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
   if (!course) return res.redirect('/teacher/dashboard');
   const lesson = await Lesson.findOne({ _id: req.params.lessonId, module: req.params.moduleId });
-  if (!lesson) return res.redirect(`/teacher/courses/${course._id}`);
+  if (!lesson) return res.redirect(`/teacher/levels/${course._id}`);
 
   const lessonData = lesson.toObject();
   lessonData.audioUrl = await generateSignedUrl(lessonData.audioUrl);
 
   res.render('teacher/lesson-form', {
-    title: 'Edit Lesson', user: req.user, isEdit: true,
+    title: 'تعديل الدرس', user: req.user, isEdit: true,
     courseId: course._id, courseTitle: course.title, moduleId: req.params.moduleId, lesson: lessonData,
   });
 };
@@ -246,11 +251,11 @@ exports.handleEditLesson = async (req, res) => {
   const lesson = await Lesson.findOne({ _id: req.params.lessonId, module: req.params.moduleId });
   if (!lesson) {
     if (req.file) await deleteAudio(getAudioUrl(req.file));
-    return res.redirect(`/teacher/courses/${course._id}`);
+    return res.redirect(`/teacher/levels/${course._id}`);
   }
 
   const { title, description, order } = req.body;
-  const updateData = { title: (title || '').trim(), description, order: parseInt(order, 10) || 0 };
+  const updateData = { title: (title || '').trim(), description, order: Math.max(1, parseInt(order, 10) || 1) };
 
   if (req.file) {
     if (lesson.audioUrl) await deleteAudio(lesson.audioUrl);
@@ -258,7 +263,7 @@ exports.handleEditLesson = async (req, res) => {
   }
 
   await Lesson.findByIdAndUpdate(lesson._id, updateData);
-  res.redirect(`/teacher/courses/${course._id}`);
+  res.redirect(`/teacher/levels/${course._id}`);
 };
 
 exports.handleDeleteLesson = async (req, res) => {
@@ -269,7 +274,7 @@ exports.handleDeleteLesson = async (req, res) => {
   if (lesson && lesson.audioUrl) await deleteAudio(lesson.audioUrl);
   if (lesson) await Quiz.findOneAndDelete({ lesson: lesson._id });
 
-  res.redirect(`/teacher/courses/${course._id}`);
+  res.redirect(`/teacher/levels/${course._id}`);
 };
 
 // ── Quiz management ───────────────────────────────────────────────────────────
@@ -278,12 +283,12 @@ exports.showQuizForm = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
   if (!course) return res.redirect('/teacher/dashboard');
   const lesson = await Lesson.findOne({ _id: req.params.lessonId, module: req.params.moduleId });
-  if (!lesson) return res.redirect(`/teacher/courses/${course._id}`);
+  if (!lesson) return res.redirect(`/teacher/levels/${course._id}`);
 
   const quiz = await Quiz.findOne({ lesson: lesson._id }).lean();
 
   res.render('teacher/quiz-form', {
-    title: quiz ? 'Edit Quiz' : 'Create Quiz',
+    title: quiz ? 'تعديل الاختبار' : 'إنشاء اختبار',
     user: req.user,
     courseId: course._id,
     courseTitle: course.title,
@@ -298,7 +303,7 @@ exports.handleQuizForm = async (req, res) => {
   const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
   if (!course) return res.redirect('/teacher/dashboard');
   const lesson = await Lesson.findOne({ _id: req.params.lessonId, module: req.params.moduleId });
-  if (!lesson) return res.redirect(`/teacher/courses/${course._id}`);
+  if (!lesson) return res.redirect(`/teacher/levels/${course._id}`);
 
   // Parse questions from form body (questions[0][text], questions[0][options][0], etc.)
   // With extended:true (qs), nested bracket notation is parsed as a plain object { '0': {...}, ... }
@@ -306,11 +311,11 @@ exports.handleQuizForm = async (req, res) => {
   const rawQuestions = toArray(req.body.questions);
   if (!rawQuestions || rawQuestions.length !== 5) {
     return res.render('teacher/quiz-form', {
-      title: 'Quiz', user: req.user,
+      title: 'الاختبار', user: req.user,
       courseId: course._id, courseTitle: course.title,
       moduleId: req.params.moduleId, lessonId: lesson._id, lessonTitle: lesson.title,
       quiz: rawQuestions ? { questions: rawQuestions } : null,
-      flash: { error: 'All 5 questions must be filled in.' },
+      flash: { error: 'يجب تعبئة الأسئلة الخمسة كاملة.' },
     });
   }
 
@@ -326,11 +331,11 @@ exports.handleQuizForm = async (req, res) => {
 
   if (!isValid) {
     return res.render('teacher/quiz-form', {
-      title: 'Quiz', user: req.user,
+      title: 'الاختبار', user: req.user,
       courseId: course._id, courseTitle: course.title,
       moduleId: req.params.moduleId, lessonId: lesson._id, lessonTitle: lesson.title,
       quiz: { questions },
-      flash: { error: 'Please fill in all question texts and options.' },
+      flash: { error: 'يرجى تعبئة كل نصوص الأسئلة والخيارات.' },
     });
   }
 
@@ -341,5 +346,5 @@ exports.handleQuizForm = async (req, res) => {
     await Quiz.create({ lesson: lesson._id, questions });
   }
 
-  res.redirect(`/teacher/courses/${course._id}`);
+  res.redirect(`/teacher/levels/${course._id}`);
 };
