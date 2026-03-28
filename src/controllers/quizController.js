@@ -157,8 +157,8 @@ exports.submitQuiz = async (req, res) => {
       scorePercent,
       passed,
       message: passed
-        ? 'Congratulations! You passed. The next lesson is now unlocked.'
-        : `You scored ${scorePercent}%. You need at least 70% to unlock the next lesson. Please try again.`,
+        ? 'تهانينا! لقد اجتزت الاختبار. يمكنك الآن الانتقال إلى الدرس التالي.'
+        : `لقد حصلت على ${scorePercent}%. تحتاج إلى 70% على الأقل لفتح الدرس التالي. يرجى المحاولة مرة أخرى.`,
     },
   });
 };
