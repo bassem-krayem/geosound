@@ -105,6 +105,11 @@ function showQuizError(msg) {
 function renderQuizResult(result) {
   const container = document.getElementById('quiz-result-container');
   if (!container) return;
+  const nextLessonUrl = quizForm?.dataset.nextLessonUrl || '';
+  const courseUrl = quizForm?.dataset.courseUrl || '/levels';
+  const successAction = nextLessonUrl
+    ? `<a href="${nextLessonUrl}" class="btn btn-success mt-2">الدرس التالي</a>`
+    : `<a href="${courseUrl}" class="btn btn-success mt-2">العودة إلى المستوى</a>`;
   const passClass = result.passed ? 'pass' : 'fail';
   container.innerHTML = `
     <div class="quiz-result ${passClass}" role="status" aria-live="polite">
@@ -112,7 +117,7 @@ function renderQuizResult(result) {
       <p>${result.correct} / ${result.total} correct</p>
       <p>${result.message}</p>
       ${result.passed
-        ? '<a href="javascript:location.reload()" class="btn btn-success mt-2">متابعة</a>'
+        ? successAction
         : '<button type="button" class="btn btn-primary mt-2" onclick="location.reload()">حاول مرة أخرى</button>'}
     </div>`;
   container.hidden = false;

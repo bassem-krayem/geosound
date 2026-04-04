@@ -64,6 +64,8 @@
         <form
           id="quiz-form"
           data-submit-url="/api/levels/<%= courseId %>/modules/<%= moduleId %>/lessons/<%= lesson._id %>/quiz/submit"
+          data-next-lesson-url="<%= nextLessonUrl || '' %>"
+          data-course-url="/levels/<%= courseId %>"
           novalidate
           aria-label="نموذج الاختبار"
         >

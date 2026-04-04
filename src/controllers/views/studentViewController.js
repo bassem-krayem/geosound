@@ -147,6 +147,25 @@ exports.showLesson = async (req, res) => {
     }
   }
 
+  // Resolve next lesson across the whole course (module order, then lesson order)
+  let nextLessonUrl = null;
+  const courseModules = await Module.find({ course: courseId }).sort('order').lean();
+  if (courseModules.length) {
+    const orderedLessons = [];
+    for (const mod of courseModules) {
+      const modLessons = await Lesson.find({ module: mod._id }).sort('order').select('_id').lean();
+      modLessons.forEach((l) => {
+        orderedLessons.push({ moduleId: mod._id.toString(), lessonId: l._id.toString() });
+      });
+    }
+
+    const currentIdx = orderedLessons.findIndex((l) => l.lessonId === lessonId);
+    const nextLesson = currentIdx >= 0 ? orderedLessons[currentIdx + 1] : null;
+    if (nextLesson) {
+      nextLessonUrl = `/levels/${courseId}/modules/${nextLesson.moduleId}/lessons/${nextLesson.lessonId}`;
+    }
+  }
+
   res.render('student/lesson', {
     title: lesson.title,
     user: req.user || null,
@@ -157,5 +176,6 @@ exports.showLesson = async (req, res) => {
     moduleId,
     alreadyPassed,
     bestScore,
+    nextLessonUrl,
   });
 };
